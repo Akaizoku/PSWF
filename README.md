@@ -1,0 +1,2 @@
+# PSWF
+ WildFly PowerShell Module
