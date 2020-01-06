@@ -4,7 +4,7 @@ function Read-ServerState {
     Get web-server status
 
     .DESCRIPTION
-    Get the status of the web-server
+    Get the status of a JBoss web-application server
 
     .PARAMETER Path
     The optional path parameter corresponds to the path to the JBoss batch client.
@@ -15,21 +15,31 @@ function Read-ServerState {
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .EXAMPLE
-    Read-ServerState -Hostname localhost -Port 9990
+    .INPUTS
+    None. You cannot pipe objects to Read-ServerState.
+
+    .OUTPUTS
+    System.String. Read-ServerState returns the raw output from the JBoss client command.
 
     .EXAMPLE
-    Read-ServerState -Path "C:\WildFly\bin\jboss-cli.bat" -Hostname localhost -Port 9990
+    Read-ServerState -Path "C:\WildFly\bin\jboss-cli.ps1" -Controller "127.0.0.1:9990"
+
+    In this example, Read-ServerState will query the state of the server specified by the controller 127.0.0.1:9990.
 
     .EXAMPLE
     $Credentials = New-Object -TypeName "System.Management.Automation.PSCredential" -ArgumentList ("admin", (ConvertTo-SecureString -String "password" -AsPlainText -Force))
-    Read-ServerState -Path "C:\WildFly\bin\jboss-cli.bat" -Hostname localhost -Port 9990 -Credentials $Credentials
+    Read-ServerState -Path "C:\WildFly\bin\jboss-cli.ps1" -Controller "127.0.0.1:9990" -Credentials $Credentials
+
+    In this example, Read-ServerState will query the state of the server specified by the controller 127.0.0.1:9990 using the provided admin user credentials.
 
     .NOTES
     File name:      Read-ServerState.ps1
     Author:         Florian Carrier
     Creation date:  01/12/2019
-    Last modified:  20/12/2019
+    Last modified:  06/01/2020
+
+    .LINK
+    Invoke-JBossClient
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -71,20 +81,9 @@ function Read-ServerState {
     $Command = ':read-attribute(name=server-state)'
     # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
-      $Status = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
     } else {
-      $Status = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
-    }
-    # Check outcome
-    if (Select-String -InputObject $Status -Pattern '"outcome" => "success"' -SimpleMatch -Quiet) {
-      $Status = Select-String -InputObject $Status -Pattern '(?<=\"result\" \=\> ")(\w|-)*' -Encoding "UTF8" | ForEach-Object { $_.Matches.Value }
-      # Remove double-quotes and trim
-      $Status = $Status.Replace('"', '').Trim()
-      # Return status
-      return $Status
-    } else {
-      # Return down status
-      return 'down'
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
     }
   }
 }
