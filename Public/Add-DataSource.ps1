@@ -134,7 +134,6 @@ function Add-DataSource {
   }
   Process {
     Write-Log -Type "DEBUG" -Object "Creating $DataSource data-source"
-    # TODO check if data-source already exists
     # Define JBoss client command
     $Command = "/subsystem=datasources/data-source=""$DataSource"":add(enabled=""$Enabled"", jndi-name=""$JNDIName"", driver-name=""$Driver"", connection-url=""$ConnectionURL"", user-name=""$UserName"", password=""$Password"")"
     # Execute command
