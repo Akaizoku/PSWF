@@ -4,7 +4,7 @@ function Add-DataSource {
     Add data-source
 
     .DESCRIPTION
-    Add a new data-source
+    Add a new data-source to a JBoss web-application server.
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -12,11 +12,32 @@ function Add-DataSource {
     .PARAMETER Controller
     The controller parameter corresponds to the hostname and port of the JBoss host.
 
-    .PARAMETER Name
-    The name parameter corresponds to the name of the data source to create.
-
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
+
+    .PARAMETER DataSource
+    The data-source parameter corresponds to the name of the data source to create.
+
+    .PARAMETER Driver
+    The driver parameter corresponds to the driver to use.
+
+    .PARAMETER ConnectionURL
+    The connection URL parameter corresponds to the database connection URL.
+
+    .PARAMETER UserName
+    The user-name parameter corresponds to the name of the user to use for the datase connection.
+
+    .PARAMETER Password
+    The password parameter corresponds to the password of the user to use for the datase connection.
+
+    .PARAMETER Disabled
+    The disabled switch specifies whether the data-source should be disabled or not.
+
+    .INPUTS
+    None. You cannot pipe objects to Add-DataSource.DESCRIPTION
+
+    .OUTPUTS
+    System.String. Add-DataSource returns the raw output from the JBoss client command.
 
     .NOTES
     File name:      Add-DataSource.ps1
@@ -24,6 +45,9 @@ function Add-DataSource {
     Creation date:  16/12/2019
     Last modified:  06/01/2020
     WARNING         This currently does not work if the connection URL contains a reference to the database itself (";databaseName=<dbname>")
+
+    .LINK
+    Invoke-JBossClient
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
