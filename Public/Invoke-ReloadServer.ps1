@@ -6,17 +6,34 @@ function Invoke-ReloadServer {
     .DESCRIPTION
     Reload JBoss web-server
 
-    .PARAMETER Properties
-    The properties parameter corresponds to the system properties.
+    .PARAMETER Path
+    The path parameter corresponds to the path to the JBoss client.
+
+    .PARAMETER Controller
+    The controller parameter corresponds to the hostname and port of the JBoss host.
+
+    .PARAMETER Credentials
+    The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
+
+    .INPUTS
+    None. You cannot pipe objects to Invoke-ReloadServer.
+
+    .OUTPUTS
+    System.String. Invoke-ReloadServer returns the raw output from the JBoss client command.
 
     .EXAMPLE
-    Invoke-ReloadServer -Properties $Properties
+    Invoke-ReloadServer -Path "C:\WildFly\wildfly-11.0.0.Final\bin\jboss-cli.ps1" -Controller "127.0.0.1:9990"
+
+    In this example, Invoke-ReloadServer will reload the server specified by the controller 127.0.0.1:9990.
 
     .NOTES
     File name:      Invoke-ReloadServer.ps1
     Author:         Florian Carrier
     Creation date:  02/12/2019
-    Last modified:  06/12/2019
+    Last modified:  06/01/2020
+
+    .LINK
+    Invoke-JBossClient
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -24,7 +41,7 @@ function Invoke-ReloadServer {
   Param (
     [Parameter (
       Position    = 1,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Path to the JBoss client"
     )]
     [ValidateNotNUllOrEmpty ()]
@@ -32,7 +49,7 @@ function Invoke-ReloadServer {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -40,7 +57,7 @@ function Invoke-ReloadServer {
     [String]
     $Controller,
     [Parameter (
-      Position    = 4,
+      Position    = 3,
       Mandatory   = $false,
       HelpMessage = "User credentials"
     )]
@@ -53,20 +70,14 @@ function Invoke-ReloadServer {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Reload server"
+    Write-Log -Type "DEBUG" -Object "Reload server ($Controller)"
     # Define command
     $Command = ':reload'
     # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
-      $Status = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
     } else {
-      $Status = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
-    }
-    # Check outcome
-    if (Select-String -InputObject $Status -Pattern '"outcome" => "success"' -SimpleMatch -Quiet) {
-      return $true
-    } else {
-      return $false
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
     }
   }
 }
