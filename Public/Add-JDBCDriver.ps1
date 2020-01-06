@@ -4,13 +4,16 @@ function Add-JDBCDriver {
     Add JDBC driver
 
     .DESCRIPTION
-    Add a new JDBC driver
+    Add a new JDBC driver to a JBoss web-application server
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
 
     .PARAMETER Controller
     The controller parameter corresponds to the hostname and port of the JBoss host.
+
+    .PARAMETER Credentials
+    The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
     .PARAMETER Driver
     The driver parameter corresponds to the name of the JDBC driver to add.
@@ -21,14 +24,20 @@ function Add-JDBCDriver {
     .PARAMETER Class
     The class parameter corresponds to the name of the JDBC driver class.
 
-    .PARAMETER Credentials
-    The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
+    .INPUTS
+    None. You cannot pipe objects to Add-JDBCDriver.DESCRIPTION
+
+    .OUTPUTS
+    System.String. Add-JDBCDriver returns the raw output from the JBoss client command.
 
     .NOTES
     File name:      Add-JDBCDriver.ps1
     Author:         Florian Carrier
     Creation date:  19/12/2019
-    Last modified:  19/12/2019
+    Last modified:  06/01/2020
+
+    .LINK
+    Invoke-JBossClient
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -87,19 +96,16 @@ function Add-JDBCDriver {
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
-    # TODO check if resource already exists
   }
   Process {
-    Write-Log -Type "INFO" -Object "Adding $Driver JDBC driver"
+    Write-Log -Type "DEBUG" -Object "Adding $Driver JDBC driver"
     # Define JBoss client command
     $Command = "/subsystem=datasources/jdbc-driver=""$Driver"":add(driver-module-name=""$Module"",driver-name=""$Driver"",driver-class-name=""$Class"")"
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $AddJDBCDriver = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
     } else {
-      $AddJDBCDriver = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
     }
-    # Check outcome
-    Assert-JBossCliCmdOutcome -Log $AddJDBCDriver -Object "$Driver JDBC driver" -Verb "add"
   }
 }
