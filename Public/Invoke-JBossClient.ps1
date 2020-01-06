@@ -1,10 +1,10 @@
-function Add-SecurityRole {
+function Invoke-JBossClient {
   <#
     .SYNOPSIS
-    Add security role
+    Call JBoss client
 
     .DESCRIPTION
-    Add a new role to the role-based access security system of WildFly
+    Execute a specified command using the JBoss client
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -12,8 +12,8 @@ function Add-SecurityRole {
     .PARAMETER Controller
     The controller parameter corresponds to the hostname and port of the JBoss host.
 
-    .PARAMETER Role
-    The role parameter corresponds to the name of the role to create.
+    .PARAMETER Command
+    The command parameter corresponds to the command to execeute.
 
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
@@ -22,7 +22,7 @@ function Add-SecurityRole {
     The redirect parameter is a flag to enable the redirection of errors to the standard output stream.
 
     .NOTES
-    File name:      Add-SecurityRole.ps1
+    File name:      Invoke-JBossClient.ps1
     Author:         Florian Carrier
     Creation date:  21/10/2019
     Last modified:  06/12/2019
@@ -33,7 +33,7 @@ function Add-SecurityRole {
   Param (
     [Parameter (
       Position    = 1,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Path to the JBoss client"
     )]
     [ValidateNotNUllOrEmpty ()]
@@ -41,7 +41,7 @@ function Add-SecurityRole {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -51,11 +51,11 @@ function Add-SecurityRole {
     [Parameter (
       Position    = 3,
       Mandatory   = $true,
-      HelpMessage = "Name of the role to be created"
+      HelpMessage = "Command to execute"
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $Role,
+    $Command,
     [Parameter (
       Position    = 4,
       Mandatory   = $false,
@@ -63,26 +63,35 @@ function Add-SecurityRole {
     )]
     [ValidateNotNUllOrEmpty ()]
     [System.Management.Automation.PSCredential]
-    $Credentials
+    $Credentials,
+    [Parameter (
+      HelpMessage = "Force switch"
+    )]
+    [Switch]
+    $Force,
+    [Parameter (
+      HelpMessage = "Switch to redirect error stream"
+    )]
+    [Switch]
+    $Redirect
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "INFO" -Object "Creating $Role role"
-    # TODO check if role already exists
-    # Define JBoss client command
-    $Command = "/core-service=management/access=authorization/role-mapping=$($Role):add"
-    # Execute command
+    # Check credentials
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $AddRole = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
+      # Construct JBoss client command with credential
+      $JBossCliCmd = Write-JBossClientCmd -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect:$Redirect -Force:$Force
     } else {
-      $AddRole = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
+      # Construct JBoss client command for local use
+      $JBossCliCmd =  Write-JBossClientCmd -Path $Path -Controller $Controller -Command $Command -Redirect:$Redirect -Force:$Force
     }
-    # Debugging
-    Write-Log -Type "DEBUG" -Object $AddRole
-    # Check outcome
-    Assert-JBossCliCmdOutcome -Log $AddRole -Object "$Role role" -Verb "create"
+    # Execute command
+    $JBossCliLog = Invoke-Expression -Command $JBossCliCmd | Out-String
+    Write-Log -Type "DEBUG" -Object $JBossCliLog
+    # Return log
+    return $JBossCliLog
   }
 }

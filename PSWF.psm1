@@ -12,7 +12,7 @@
   Author:         Florian Carrier
   Creation date:  02/12/2019
   Last modified:  02/12/2019
-  Repository:     https://github.com/Akaizoku/PSTF
+  Repository:     https://github.com/Akaizoku/PSWF
   Dependencies:   PowerShell Tool Kit (PSTK)
 
   .LINK

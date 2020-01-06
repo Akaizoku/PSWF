@@ -6,8 +6,8 @@ function Add-User {
     .DESCRIPTION
     Add an user to the WildFly management interface
 
-    .PARAMETER Properties
-    The properties parameter corresponds to the application configuration.
+    .PARAMETER Path
+    The path parameter corresponds to the path to the add-user script.
 
     .PARAMETER Credentials
     The credentials parameter corresponds to the credentials of the user to be created.
@@ -18,17 +18,15 @@ function Add-User {
     1. Management
     2. Application
 
-    .PARAMETER Realm
-    The type parameter corresponds to the name of the realm used to secure the management interfaces.
-    There are two available types:
-    1. Management
-    2. Application
+    .PARAMETER UserGroup
+    The optional user group parameter corresponds to the name of the user group to assign the user to.
 
     .NOTES
     File name:      Add-User.ps1
     Author:         Florian Carrier
     Creation date:  15/10/2019
-    Last modified:  21/10/2019
+    Last modified:  17/12/2019
+    TODO            Check JBoss client script type (extension)
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -37,21 +35,21 @@ function Add-User {
     [Parameter (
       Position    = 1,
       Mandatory   = $true,
-      HelpMessage = "List of properties"
+      HelpMessage = "Path to the JBoss add user script"
     )]
-    [ValidateNotNullOrEmpty ()]
-    [System.Collections.Specialized.OrderedDictionary]
-    $Properties,
+    [ValidateNotNUllOrEmpty ()]
+    [String]
+    $Path,
     [Parameter (
       Position    = 2,
       Mandatory   = $true,
-      HelpMessage = "Credentials of the administration user"
+      HelpMessage = "Credentials of the user"
     )]
     [ValidateNotNullOrEmpty ()]
     [System.Management.Automation.PSCredential]
     $Credentials,
     [Parameter (
-      Position    = 3,
+      Position    = 4,
       Mandatory   = $true,
       HelpMessage = "Type of user"
     )]
@@ -62,7 +60,7 @@ function Add-User {
     [String]
     $Type,
     [Parameter (
-      Position    = 4,
+      Position    = 5,
       Mandatory   = $false,
       HelpMessage = "User group in which to add the user"
     )]
@@ -76,23 +74,20 @@ function Add-User {
     # Format user type
     $UserType = Format-String -String $Type -Format "lowercase"
     # Define realm
-    if ($Type -eq "Application") {
-      $Realm = "ApplicationRealm"
-    } elseif ($Type -eq "Management") {
-      $Realm = "ManagementRealm"
+    switch ($Type) {
+      "Application" { $Realm = "ApplicationRealm" }
+      "Management"  { $Realm = "ManagementRealm"  }
     }
   }
   Process {
     Write-Log -Type "INFO" -Object "Add $UserType user $($Credentials.UserName)"
-    $BinDirectory   = Join-Path -Path $Properties.JBossHomeDirectory  -ChildPath $Properties.WildFlyBinDirectory
-    $AddUserScript  = Join-Path -Path $BinDirectory                   -ChildPath $Properties.AddUserScript
     # Define JBoss client command
-    $AddUserCommand = "$AddUserScript --user $($Credentials.UserName) --password $($Credentials.GetNetworkCredential().Password) --realm '$Realm' --silent"
+    $AddUserCommand = "& ""$Path"" --user ""$($Credentials.UserName)"" --password ""$($Credentials.GetNetworkCredential().Password)"" --realm ""$Realm"" --silent"
     # Add user group if applicable
     if ($PSBoundParameters.ContainsKey("UserGroup") -And ($UserGroup)) {
-      $AddUserCommand = $AddUserCommand + " --group '$UserGroup'"
+      $AddUserCommand = $AddUserCommand + " --group ""$UserGroup"""
     }
-    Write-Log -Type "DEBUG" -Object $AddUserCommand
+    Write-Log -Type "DEBUG" -Object $AddUserCommand -Obfuscate $Credentials.GetNetworkCredential().Password
     # Execute add user command
     Invoke-Expression -Command $AddUserCommand
     Write-Log -Type "CHECK" -Object "User $($Credentials.UserName) successfully created"

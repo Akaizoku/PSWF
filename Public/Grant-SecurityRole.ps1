@@ -6,8 +6,14 @@ function Grant-SecurityRole {
     .DESCRIPTION
     Grant a specified application security role to a specified user group
 
-    .PARAMETER Properties
-    The properties parameter corresponds to the environment properties.
+    .PARAMETER Path
+    The path parameter corresponds to the path to the JBoss client.
+
+    .PARAMETER Hostname
+    The hostname parameter corresponds to the name of the JBoss host.
+
+    .PARAMETER Port
+    The port parameter corresponds to the port of the management console.
 
     .PARAMETER Role
     The role parameter corresponds to the name of the security role to be granted.
@@ -19,7 +25,7 @@ function Grant-SecurityRole {
     File name:      Grant-SecurityRole.ps1
     Author:         Florian Carrier
     Creation date:  21/10/2019
-    Last modified:  21/10/2019
+    Last modified:  13/12/2019
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -28,11 +34,20 @@ function Grant-SecurityRole {
     [Parameter (
       Position    = 1,
       Mandatory   = $true,
-      HelpMessage = "List of properties"
+      HelpMessage = "Path to the JBoss client"
     )]
-    [ValidateNotNullOrEmpty ()]
-    [System.Collections.Specialized.OrderedDictionary]
-    $Properties,
+    [ValidateNotNUllOrEmpty ()]
+    [String]
+    $Path,
+    [Parameter (
+      Position    = 2,
+      Mandatory   = $false,
+      HelpMessage = "Controller"
+    )]
+    # TODO validate format
+    [ValidateNotNUllOrEmpty ()]
+    [String]
+    $Controller,
     [Parameter (
       Position    = 3,
       Mandatory   = $true,
@@ -59,7 +74,7 @@ function Grant-SecurityRole {
     # Define command
     $Command = "/core-service=management/access=authorization/role-mapping=$Role/include=group-$($UserGroup):add(name=$UserGroup,type=GROUP)"
     # Execute command
-    $GrantRole = Invoke-JBossCli -Properties $Properties -Command $Command -Redirect
-    Test-JBossCliCmd -Log $GrantRole -Object "$Role role" -Verb "grant"
+    $GrantRole = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
+    Assert-JBossCliCmdOutcome -Log $GrantRole -Object "$Role role" -Verb "grant"
   }
 }

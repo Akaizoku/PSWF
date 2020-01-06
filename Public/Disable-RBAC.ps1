@@ -1,10 +1,10 @@
-function Enable-RBAC {
+function Disable-RBAC {
   <#
     .SYNOPSIS
-    Enable RBAC
+    Disable RBAC
 
     .DESCRIPTION
-    Configure role-based access control security model for WildFly
+    Disable role-based access control security model for WildFly
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -13,9 +13,9 @@ function Enable-RBAC {
     The controller parameter corresponds to the hostname and port of the JBoss host.
 
     .NOTES
-    File name:      Enable-RBAC.ps1
+    File name:      Disable-RBAC.ps1
     Author:         Florian Carrier
-    Creation date:  18/10/2019
+    Creation date:  17/12/2019
     Last modified:  17/12/2019
   #>
   [CmdletBinding (
@@ -53,9 +53,9 @@ function Enable-RBAC {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "INFO" -Object "Enabling role-based access control security model"
-    # TODO
-    $Command = '/core-service=management/access=authorization:write-attribute(name=provider,value=rbac)'
+    Write-Log -Type "INFO" -Object "Disabling role-based access control security model"
+    # Restore standard security model
+    $Command = '/core-service=management/access=authorization:write-attribute(name=provider,value=simple)'
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
       $RBACSetup = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
@@ -65,6 +65,6 @@ function Enable-RBAC {
     # Debugging
     Write-Log -Type "DEBUG" -Object $RBACSetup
     # Check outcome
-    Assert-JBossCliCmdOutcome -Log $RBACSetup -Object "RBAC security model" -Verb "enable"
+    Assert-JBossCliCmdOutcome -Log $RBACSetup -Object "RBAC security model" -Verb "disable"
   }
 }

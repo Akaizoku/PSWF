@@ -1,19 +1,22 @@
-function Set-JVMProperties {
+function Set-JavaOptions {
   <#
     .SYNOPSIS
-    Configure JVM
+    Configure java options
 
     .DESCRIPTION
-    Configure Java Virtual Machine properties
+    Configure Java Virtual Machine options
 
-    .PARAMETER Properties
-    The properties parameter corressponds to the application configuration.
+    .PARAMETER Path
+    The path parameter corresponds to the path to the application configuration file.
+
+    .PARAMETER JavaOptions
+    The java options parameter corresponds to the Java options to configure for the JVM.
 
     .NOTES
-    File name:      Set-JVMProperties.ps1
+    File name:      Set-JavaOptions.ps1
     Author:         Florian Carrier
     Creation date:  15/10/2019
-    Last modified:  15/10/2019
+    Last modified:  12/12/2019
     Warning:        /!\ JAVA_OPTS environment variable takes precedence
   #>
   [CmdletBinding (
@@ -23,11 +26,11 @@ function Set-JVMProperties {
     [Parameter (
       Position    = 1,
       Mandatory   = $true,
-      HelpMessage = "List of properties"
+      HelpMessage = "Path to WildFly configuration file"
     )]
     [ValidateNotNullOrEmpty ()]
-    [System.Collections.Specialized.OrderedDictionary]
-    $Properties,
+    [String]
+    $Path,
     [Parameter (
       Position    = 2,
       Mandatory   = $true,
@@ -43,16 +46,14 @@ function Set-JVMProperties {
   }
   Process {
     Write-Log -Type "INFO" -Object "Configure Java Virtual Machine (JVM)"
-    $BinDirectory         = Join-Path -Path $Properties.JBossHomeDirectory  -ChildPath $Properties.WildFlyBinDirectory
-    $JVMConfigurationFile = Join-Path -Path $BinDirectory -ChildPath $Properties.WSStandaloneConfig
-    $JVMConfiguration     = Get-Content -Path $JVMConfigurationFile
+    $JVMConfiguration = Get-Content -Path $Path
     # Select configuration anchor line number
-    $AnchorLine = $JVMConfiguration | Select-String -Pattern "$($Properties.JavaOptionsAnchor)" | Select-Object -ExpandProperty "LineNumber"
+    $AnchorLine = $JVMConfiguration | Select-String -Pattern 'rem # JVM memory allocation pool parameters - modify as appropriate.' | Select-Object -ExpandProperty "LineNumber"
     # Update configuration
     $JavaOpts = 'set "JAVA_OPTS=' + $JavaOptions + '"'
     Write-Log -Type "DEBUG" -Object $JavaOpts
     $JVMConfiguration[$AnchorLine] = $JavaOpts
     # Save configuration file
-    Set-Content -Path $JVMConfigurationFile -Value $JVMConfiguration
+    Set-Content -Path $Path -Value $JVMConfiguration
   }
 }
