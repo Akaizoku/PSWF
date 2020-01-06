@@ -25,7 +25,7 @@ function Add-JDBCDriver {
     The class parameter corresponds to the name of the JDBC driver class.
 
     .INPUTS
-    None. You cannot pipe objects to Add-JDBCDriver.DESCRIPTION
+    None. You cannot pipe objects to Add-JDBCDriver.
 
     .OUTPUTS
     System.String. Add-JDBCDriver returns the raw output from the JBoss client command.
