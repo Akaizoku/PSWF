@@ -22,7 +22,7 @@ function Add-DataSource {
     File name:      Add-DataSource.ps1
     Author:         Florian Carrier
     Creation date:  16/12/2019
-    Last modified:  17/12/2019
+    Last modified:  06/01/2020
     WARNING         This currently does not work if the connection URL contains a reference to the database itself (";databaseName=<dbname>")
   #>
   [CmdletBinding (
@@ -109,17 +109,15 @@ function Add-DataSource {
     $JNDIName = "java:/jdbc/$DataSource"
   }
   Process {
-    Write-Log -Type "INFO" -Object "Creating $DataSource data-source"
+    Write-Log -Type "DEBUG" -Object "Creating $DataSource data-source"
     # TODO check if data-source already exists
     # Define JBoss client command
     $Command = "/subsystem=datasources/data-source=""$DataSource"":add(enabled=""$Enabled"", jndi-name=""$JNDIName"", driver-name=""$Driver"", connection-url=""$ConnectionURL"", user-name=""$UserName"", password=""$Password"")"
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $AddDataSource = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
     } else {
-      $AddDataSource = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
     }
-    # Check outcome
-    Assert-JBossCliCmdOutcome -Log $AddDataSource -Object "$DataSource data-source" -Verb "add"
   }
 }
