@@ -4,7 +4,7 @@ function Remove-JDBCDriver {
     Remove JDBC driver
 
     .DESCRIPTION
-    Remove a JDBC driver
+    Remove a JDBC driver from a JBoss web-application server
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -18,17 +18,20 @@ function Remove-JDBCDriver {
     .PARAMETER Driver
     The driver parameter corresponds to the name of the JDBC driver to add.
 
-    .PARAMETER Module
-    The module parameter corresponds to the name of the JDBC driver module.
+    .INPUTS
+    System.String. You can pipe the driver name to Remove-JDBCDriver.
 
-    .PARAMETER Class
-    The class parameter corresponds to the name of the JDBC driver class.
+    .OUTPUTS
+    System.String. Add-JDBCDriver returns the raw output from the JBoss client command.
 
     .NOTES
     File name:      Remove-JDBCDriver.ps1
     Author:         Florian Carrier
     Creation date:  20/12/2019
-    Last modified:  20/12/2019
+    Last modified:  06/01/2020
+
+    .LINK
+    Invoke-JBossClient
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -62,7 +65,9 @@ function Remove-JDBCDriver {
     [Parameter (
       Position    = 4,
       Mandatory   = $true,
-      HelpMessage = "Name of the JDBC driver to add"
+      HelpMessage = "Name of the JDBC driver to remove",
+      ValueFromPipeline               = $true,
+      ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
@@ -75,26 +80,14 @@ function Remove-JDBCDriver {
     $Resource = "/subsystem=datasources/jdbc-driver=""$Driver"""
   }
   Process {
-    Write-Log -Type "INFO" -Object "Removing $Driver JDBC driver"
-    # TODO check if resource exists
+    Write-Log -Type "DEBUG" -Object "Removing $Driver JDBC driver"
+    # Define JBoss client command
+    $RemoveCommand = "$($Resource):remove()"
+    # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $ReadJDBCDriver = Read-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
+      $RemoveJDBCDriver = Invoke-JBossClient -Path $Path -Controller $Controller -Command $RemoveCommand -Credentials $Credentials
     } else {
-      $ReadJDBCDriver = Read-Resource -Path $Path -Controller $Controller -Resource $Resource
-    }
-    if ($ReadJDBCDriver) {
-      # Define JBoss client command
-      $RemoveCommand = "$($Resource):remove()"
-      # Execute command
-      if ($PSBoundParameters.ContainsKey("Credentials")) {
-        $RemoveJDBCDriver = Invoke-JBossClient -Path $Path -Controller $Controller -Command $RemoveCommand -Credentials $Credentials
-      } else {
-        $RemoveJDBCDriver = Invoke-JBossClient -Path $Path -Controller $Controller -Command $RemoveCommand
-      }
-      # Check outcome
-      Assert-JBossCliCmdOutcome -Log $RemoveJDBCDriver -Object "$Driver JDBC driver" -Verb "remove"
-    } else {
-      Write-Log -Type "WARN" -Object "$Driver JDBC driver is not configured"
+      $RemoveJDBCDriver = Invoke-JBossClient -Path $Path -Controller $Controller -Command $RemoveCommand
     }
   }
 }
