@@ -98,7 +98,7 @@ function Add-Module {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "INFO" -Object "Adding $Module module"
+    Write-Log -Type "DEBUG" -Object "Adding $Module module"
     # Define JBoss client command
     # WARNING Use single quotes around dependencies to avoid parsing issue in case it contains a comma
     $Command = "module add --name=""$Module"" --resources=""$Resources"" --dependencies='$Dependencies'"
