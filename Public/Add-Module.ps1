@@ -4,7 +4,7 @@ function Add-Module {
     Add module
 
     .DESCRIPTION
-    Add a new JDBC driver
+    Add a new module to a JBoss web-application server
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -24,11 +24,20 @@ function Add-Module {
     .PARAMETER Dependencies
     The dependencies parameter corresponds to the module depndencies.
 
+    .INPUTS
+    None. You cannot pipe objects to Add-Module.
+
+    .OUTPUTS
+    System.String. Add-Module returns the raw output from the JBoss client command.
+
     .NOTES
     File name:      Add-Module.ps1
     Author:         Florian Carrier
     Creation date:  19/12/2019
-    Last modified:  20/12/2019
+    Last modified:  06/01/2020
+
+    .LINK
+    Invoke-JBossClient
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -87,7 +96,6 @@ function Add-Module {
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
-    # TODO check if resource already exists
   }
   Process {
     Write-Log -Type "INFO" -Object "Adding $Module module"
@@ -96,26 +104,9 @@ function Add-Module {
     $Command = "module add --name=""$Module"" --resources=""$Resources"" --dependencies='$Dependencies'"
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $AddModule = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
     } else {
-      $AddModule = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
-    }
-    # Check outcome
-    if (Select-String -InputObject $AddModule -Pattern "Module $Module already exists" -SimpleMatch -Quiet) {
-      # If resource already exists
-        Write-Log -Type "WARN" -Object "Module $Module already exists"
-    }
-    # If operation is successfull
-    elseif (Select-String -InputObject $AddModule -Pattern '"outcome" => "success"' -SimpleMatch -Quiet) {
-      if ($Quiet) {
-        return $true
-      } else {
-        Write-Log -Type "CHECK" -Object "Module $Module has been successfully added"
-      }
-    }
-    # Case when no outcome status is provided
-    else {
-      Write-Log -Type "ERROR" -Object $AddModule -ExitCode 1
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
     }
   }
 }
