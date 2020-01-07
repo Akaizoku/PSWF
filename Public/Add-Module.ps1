@@ -30,11 +30,18 @@ function Add-Module {
     .OUTPUTS
     System.String. Add-Module returns the raw output from the JBoss client command.
 
+    .EXAMPLE
+
+    Add-JDBCDriver -Path "C:\WKFS\WildFly\bin\jboss-cli.ps1" -Controller "127.0.0.1:9990" -Driver "mssql" -Module "mssql.jdbc" -Class "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+
+    In this example, Add-JDBCDriver will add a new driver with the name mssql using the module mssql.jdbc and the class com.microsoft.sqlserver.jdbc.SQLServerDriver to the JBoss server specified by the local controller.
+
     .NOTES
     File name:      Add-Module.ps1
     Author:         Florian Carrier
     Creation date:  19/12/2019
-    Last modified:  06/01/2020
+    Last modified:  07/01/2020
+    WARNING         Do not use quotes around dependencies. The values should not contain spaces and the comma prevents the use of double-quotes.
 
     .LINK
     Invoke-JBossClient
@@ -100,8 +107,7 @@ function Add-Module {
   Process {
     Write-Log -Type "DEBUG" -Object "Adding $Module module"
     # Define JBoss client command
-    # WARNING Use single quotes around dependencies to avoid parsing issue in case it contains a comma
-    $Command = "module add --name=""$Module"" --resources=""$Resources"" --dependencies='$Dependencies'"
+    $Command = "module add --name=""$Module"" --resources=""$Resources"" --dependencies=$Dependencies"
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
