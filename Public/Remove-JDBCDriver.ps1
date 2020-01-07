@@ -32,6 +32,9 @@ function Remove-JDBCDriver {
 
     .LINK
     Invoke-JBossClient
+
+    .LINK
+    Add-JDBCDriver
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
