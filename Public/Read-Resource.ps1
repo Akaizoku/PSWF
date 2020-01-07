@@ -4,7 +4,7 @@ function Read-Resource {
     Read resource
 
     .DESCRIPTION
-    Check if a resource exists
+    Check if a resource exists on a JBoss web-application server
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss batch client.
@@ -16,13 +16,22 @@ function Read-Resource {
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
     .PARAMETER Resource
-    The resource parameter corresponds to the path to the resource
+    The resource parameter corresponds to the path to the resource.
+
+    .INPUTS
+    System.String. You can pipe the resource path to Read-Resource.
+
+    .OUTPUTS
+    System.String. Read-Resource returns the raw output from the JBoss client command.
 
     .NOTES
     File name:      Read-Resource.ps1
     Author:         Florian Carrier
     Creation date:  20/12/2019
-    Last modified:  20/12/2019
+    Last modified:  07/01/2020
+
+    .LINK
+    Invoke-JBossClient
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -56,7 +65,9 @@ function Read-Resource {
     [Parameter (
       Position    = 4,
       Mandatory   = $true,
-      HelpMessage = "Path to the resource"
+      HelpMessage = "Path to the resource",
+      ValueFromPipeline               = $true,
+      ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
@@ -72,11 +83,9 @@ function Read-Resource {
     $Command = "$($Resource):read-resource()"
     # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
-      $ReadResource = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
     } else {
-      $ReadResource = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
     }
-    # Check outcome
-    Assert-JBossCliCmdOutcome -Log $ReadResource -Object "$Resource resource" -Verb "exist" -Quiet
   }
 }
