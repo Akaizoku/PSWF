@@ -71,7 +71,9 @@ function Remove-Module {
     [Parameter (
       Position    = 4,
       Mandatory   = $true,
-      HelpMessage = "Name of the module to remove"
+      HelpMessage = "Name of the module to remove",
+      ValueFromPipeline               = $true,
+      ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
