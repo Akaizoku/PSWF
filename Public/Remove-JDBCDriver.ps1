@@ -22,7 +22,7 @@ function Remove-JDBCDriver {
     System.String. You can pipe the driver name to Remove-JDBCDriver.
 
     .OUTPUTS
-    System.String. Add-JDBCDriver returns the raw output from the JBoss client command.
+    System.String. Add-JDBCDriver returns the raw output from the JBoss client.
 
     .NOTES
     File name:      Remove-JDBCDriver.ps1

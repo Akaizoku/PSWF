@@ -22,7 +22,7 @@ function Read-Resource {
     System.String. You can pipe the resource path to Read-Resource.
 
     .OUTPUTS
-    System.String. Read-Resource returns the raw output from the JBoss client command.
+    System.String. Read-Resource returns the raw output from the JBoss client.
 
     .NOTES
     File name:      Read-Resource.ps1

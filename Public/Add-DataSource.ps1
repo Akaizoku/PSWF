@@ -37,7 +37,7 @@ function Add-DataSource {
     None. You cannot pipe objects to Add-DataSource.DESCRIPTION
 
     .OUTPUTS
-    System.String. Add-DataSource returns the raw output from the JBoss client command.
+    System.String. Add-DataSource returns the raw output from the JBoss client.
 
     .NOTES
     File name:      Add-DataSource.ps1

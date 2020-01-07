@@ -19,7 +19,7 @@ function Read-ServerState {
     None. You cannot pipe objects to Read-ServerState.
 
     .OUTPUTS
-    System.String. Read-ServerState returns the raw output from the JBoss client command.
+    System.String. Read-ServerState returns the raw output from the JBoss client.
 
     .EXAMPLE
     Read-ServerState -Path "C:\WildFly\bin\jboss-cli.ps1" -Controller "127.0.0.1:9990"

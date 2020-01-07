@@ -28,7 +28,7 @@ function Add-Module {
     None. You cannot pipe objects to Add-Module.
 
     .OUTPUTS
-    System.String. Add-Module returns the raw output from the JBoss client command.
+    System.String. Add-Module returns the raw output from the JBoss client.
 
     .EXAMPLE
 

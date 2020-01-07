@@ -28,7 +28,7 @@ function Add-JDBCDriver {
     None. You cannot pipe objects to Add-JDBCDriver.
 
     .OUTPUTS
-    System.String. Add-JDBCDriver returns the raw output from the JBoss client command.
+    System.String. Add-JDBCDriver returns the raw output from the JBoss client.
 
     .NOTES
     File name:      Add-JDBCDriver.ps1

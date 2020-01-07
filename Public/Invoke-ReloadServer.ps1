@@ -19,7 +19,7 @@ function Invoke-ReloadServer {
     None. You cannot pipe objects to Invoke-ReloadServer.
 
     .OUTPUTS
-    System.String. Invoke-ReloadServer returns the raw output from the JBoss client command.
+    System.String. Invoke-ReloadServer returns the raw output from the JBoss client.
 
     .EXAMPLE
     Invoke-ReloadServer -Path "C:\WildFly\wildfly-11.0.0.Final\bin\jboss-cli.ps1" -Controller "127.0.0.1:9990"

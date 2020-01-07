@@ -28,7 +28,7 @@ function Remove-Module {
     System.String. You can pipe the module name to Remove-Module.
 
     .OUTPUTS
-    System.String. Remove-Module returns the raw output from the JBoss client command.
+    System.String. Remove-Module returns the raw output from the JBoss client.
 
     .NOTES
     File name:      Remove-Module.ps1
