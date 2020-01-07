@@ -12,20 +12,32 @@ function Add-SecurityRole {
     .PARAMETER Controller
     The controller parameter corresponds to the hostname and port of the JBoss host.
 
-    .PARAMETER Role
-    The role parameter corresponds to the name of the role to create.
-
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .PARAMETER Redirect
-    The redirect parameter is a flag to enable the redirection of errors to the standard output stream.
+    .PARAMETER Role
+    The role parameter corresponds to the name of the role to create.
+
+    .INPUTS
+    System.String. You can pipe the role name to Add-SecurityRole.
+
+    .OUTPUTS
+    System.String. Add-SecurityRole returns the raw output from the JBoss client.
 
     .NOTES
     File name:      Add-SecurityRole.ps1
     Author:         Florian Carrier
     Creation date:  21/10/2019
-    Last modified:  06/12/2019
+    Last modified:  07/01/2020
+
+    .LINK
+    Invoke-JBossClient
+
+    .LINK
+    Remove-SecurityRole
+
+    .LINK
+    Test-SecurityRole
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -50,39 +62,36 @@ function Add-SecurityRole {
     $Controller,
     [Parameter (
       Position    = 3,
-      Mandatory   = $true,
-      HelpMessage = "Name of the role to be created"
-    )]
-    [ValidateNotNUllOrEmpty ()]
-    [String]
-    $Role,
-    [Parameter (
-      Position    = 4,
       Mandatory   = $false,
       HelpMessage = "User credentials"
     )]
     [ValidateNotNUllOrEmpty ()]
     [System.Management.Automation.PSCredential]
-    $Credentials
+    $Credentials,
+    [Parameter (
+      Position    = 4,
+      Mandatory   = $true,
+      HelpMessage = "Name of the role to be created",
+      ValueFromPipeline               = $true,
+      ValueFromPipelineByPropertyName = $true
+    )]
+    [ValidateNotNUllOrEmpty ()]
+    [String]
+    $Role
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "INFO" -Object "Creating $Role role"
-    # TODO check if role already exists
+    Write-Log -Type "DEBUG" -Object "Creating $Role role"
     # Define JBoss client command
     $Command = "/core-service=management/access=authorization/role-mapping=$($Role):add"
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $AddRole = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
     } else {
-      $AddRole = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
     }
-    # Debugging
-    Write-Log -Type "DEBUG" -Object $AddRole
-    # Check outcome
-    Assert-JBossCliCmdOutcome -Log $AddRole -Object "$Role role" -Verb "create"
   }
 }
