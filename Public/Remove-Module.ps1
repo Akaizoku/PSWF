@@ -38,6 +38,12 @@ function Remove-Module {
 
     .LINK
     Invoke-JBossClient
+
+    .LINK
+    Add-Module
+
+    .LINK
+    Test-Module
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
