@@ -4,7 +4,7 @@ function Disable-RBAC {
     Disable RBAC
 
     .DESCRIPTION
-    Disable role-based access control security model for WildFly
+    Disable role-based access control security model for A JBoss instance
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -12,11 +12,26 @@ function Disable-RBAC {
     .PARAMETER Controller
     The controller parameter corresponds to the hostname and port of the JBoss host.
 
+    .PARAMETER Credentials
+    The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
+
+    .INPUTS
+    None. You cannot pipe objects to Remove-UserGroupRole.
+
+    .OUTPUTS
+    System.String. Disable-RBAC returns the raw output from the JBoss client.
+
     .NOTES
     File name:      Disable-RBAC.ps1
     Author:         Florian Carrier
     Creation date:  17/12/2019
-    Last modified:  17/12/2019
+    Last modified:  07/01/2020
+
+    .LINK
+    Invoke-JBossClient
+
+    .LINK
+    Enable-RBAC
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -32,7 +47,7 @@ function Disable-RBAC {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -53,18 +68,14 @@ function Disable-RBAC {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "INFO" -Object "Disabling role-based access control security model"
+    Write-Log -Type "DEBUG" -Object "Disabling role-based access control security model"
     # Restore standard security model
     $Command = '/core-service=management/access=authorization:write-attribute(name=provider,value=simple)'
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $RBACSetup = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
     } else {
-      $RBACSetup = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
     }
-    # Debugging
-    Write-Log -Type "DEBUG" -Object $RBACSetup
-    # Check outcome
-    Assert-JBossCliCmdOutcome -Log $RBACSetup -Object "RBAC security model" -Verb "disable"
   }
 }
