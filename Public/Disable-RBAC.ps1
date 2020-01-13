@@ -25,7 +25,7 @@ function Disable-RBAC {
     File name:      Disable-RBAC.ps1
     Author:         Florian Carrier
     Creation date:  17/12/2019
-    Last modified:  07/01/2020
+    Last modified:  10/01/2020
 
     .LINK
     Invoke-JBossClient
@@ -68,7 +68,6 @@ function Disable-RBAC {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Disabling role-based access control security model"
     # Restore standard security model
     $Command = '/core-service=management/access=authorization:write-attribute(name=provider,value=simple)'
     # Execute command
