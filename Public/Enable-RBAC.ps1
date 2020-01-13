@@ -16,7 +16,7 @@ function Enable-RBAC {
     File name:      Enable-RBAC.ps1
     Author:         Florian Carrier
     Creation date:  18/10/2019
-    Last modified:  17/12/2019
+    Last modified:  10/01/2020
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -32,7 +32,7 @@ function Enable-RBAC {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -42,7 +42,7 @@ function Enable-RBAC {
     [Parameter (
       Position    = 3,
       Mandatory   = $false,
-      HelpMessage = "User credentials"
+      HelpMessage = "JBoss client user credentials"
     )]
     [ValidateNotNUllOrEmpty ()]
     [System.Management.Automation.PSCredential]
@@ -53,18 +53,13 @@ function Enable-RBAC {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "INFO" -Object "Enabling role-based access control security model"
-    # TODO
+    # Define command
     $Command = '/core-service=management/access=authorization:write-attribute(name=provider,value=rbac)'
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $RBACSetup = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
     } else {
-      $RBACSetup = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
     }
-    # Debugging
-    Write-Log -Type "DEBUG" -Object $RBACSetup
-    # Check outcome
-    Assert-JBossCliCmdOutcome -Log $RBACSetup -Object "RBAC security model" -Verb "enable"
   }
 }
