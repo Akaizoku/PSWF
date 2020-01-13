@@ -12,11 +12,11 @@ function Add-User {
     .PARAMETER Credentials
     The credentials parameter corresponds to the credentials of the user to be created.
 
-    .PARAMETER Type
-    The type parameter corresponds to the type of user to be created.
-    There are two available types:
-    1. Management
-    2. Application
+    .PARAMETER Realm
+    The realm parameter corresponds to the realm in which to add the user.
+    There are two available realm:
+    1. ApplicationRealm
+    2. ManagementRealm (default value)
 
     .PARAMETER UserGroup
     The optional user group parameter corresponds to the name of the user group to assign the user to.
@@ -31,7 +31,7 @@ function Add-User {
     File name:      Add-User.ps1
     Author:         Florian Carrier
     Creation date:  15/10/2019
-    Last modified:  07/01/2020
+    Last modified:  09/01/2020
     TODO            Check JBoss client script type (extension)
   #>
   [CmdletBinding (
@@ -49,7 +49,7 @@ function Add-User {
     [Parameter (
       Position    = 2,
       Mandatory   = $true,
-      HelpMessage = "Credentials of the user",
+      HelpMessage = "Credentials of the user to add",
       ValueFromPipeline               = $true,
       ValueFromPipelineByPropertyName = $true
     )]
@@ -58,15 +58,15 @@ function Add-User {
     $Credentials,
     [Parameter (
       Position    = 3,
-      Mandatory   = $true,
-      HelpMessage = "Type of user"
+      Mandatory   = $false,
+      HelpMessage = "Realm in which to add the user"
     )]
     [ValidateSet (
-      "Management",
-      "Application"
+      "ApplicationRealm",
+      "ManagementRealm"
     )]
     [String]
-    $Type,
+    $Realm = "ManagementRealm",
     [Parameter (
       Position    = 4,
       Mandatory   = $false,
@@ -79,16 +79,8 @@ function Add-User {
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
-    # Format user type
-    $UserType = Format-String -String $Type -Format "lowercase"
-    # Define realm
-    switch ($Type) {
-      "Application" { $Realm = "ApplicationRealm" }
-      "Management"  { $Realm = "ManagementRealm"  }
-    }
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Add $UserType user $($Credentials.UserName)"
     # Define JBoss client command
     $AddUserCommand = "& ""$Path"" --user ""$($Credentials.UserName)"" --password ""$($Credentials.GetNetworkCredential().Password)"" --realm ""$Realm"" --silent"
     # Add user group if applicable
