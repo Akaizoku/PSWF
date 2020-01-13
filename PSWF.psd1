@@ -133,7 +133,7 @@ PrivateData = @{
         Tags = @('PowerShell', 'PS', 'PoSH', 'WildFly', 'JBoss', 'framework', 'utility')
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/Akaizoku/PSWF/blob/master/LICENSE'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/Akaizoku/PSWF'
