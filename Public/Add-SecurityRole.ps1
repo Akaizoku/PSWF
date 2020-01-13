@@ -16,7 +16,7 @@ function Add-SecurityRole {
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
     .PARAMETER Role
-    The role parameter corresponds to the name of the role to create.
+    The role parameter corresponds to the name of the role to add.
 
     .INPUTS
     System.String. You can pipe the role name to Add-SecurityRole.
@@ -28,7 +28,7 @@ function Add-SecurityRole {
     File name:      Add-SecurityRole.ps1
     Author:         Florian Carrier
     Creation date:  21/10/2019
-    Last modified:  07/01/2020
+    Last modified:  08/01/2020
 
     .LINK
     Invoke-JBossClient
@@ -71,7 +71,7 @@ function Add-SecurityRole {
     [Parameter (
       Position    = 4,
       Mandatory   = $true,
-      HelpMessage = "Name of the role to be created",
+      HelpMessage = "Name of the role to add",
       ValueFromPipeline               = $true,
       ValueFromPipelineByPropertyName = $true
     )]
@@ -84,9 +84,8 @@ function Add-SecurityRole {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Creating $Role role"
     # Define JBoss client command
-    $Command = "/core-service=management/access=authorization/role-mapping=$($Role):add"
+    $Command = "/core-service=management/access=authorization/role-mapping=$($Role):add()"
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials

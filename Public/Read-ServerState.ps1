@@ -36,7 +36,7 @@ function Read-ServerState {
     File name:      Read-ServerState.ps1
     Author:         Florian Carrier
     Creation date:  01/12/2019
-    Last modified:  06/01/2020
+    Last modified:  10/01/2020
 
     .LINK
     Invoke-JBossClient
@@ -76,7 +76,6 @@ function Read-ServerState {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Read server-state attribute"
     # Define command
     $Command = ':read-attribute(name=server-state)'
     # Execute command

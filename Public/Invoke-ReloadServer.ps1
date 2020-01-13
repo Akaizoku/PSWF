@@ -30,7 +30,7 @@ function Invoke-ReloadServer {
     File name:      Invoke-ReloadServer.ps1
     Author:         Florian Carrier
     Creation date:  02/12/2019
-    Last modified:  06/01/2020
+    Last modified:  10/01/2020
 
     .LINK
     Invoke-JBossClient
@@ -70,9 +70,8 @@ function Invoke-ReloadServer {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Reload server ($Controller)"
     # Define command
-    $Command = ':reload'
+    $Command = ':reload()'
     # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
