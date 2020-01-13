@@ -30,10 +30,10 @@ CompanyName = 'Florian Carrier'
 Copyright = '(c) 2019-2020 Florian Carrier. All rights reserved.'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'PowerShell framework to manage WildFly web-application server.'
 
 # Minimum version of the Windows PowerShell engine required by this module
-# PowerShellVersion = ''
+PowerShellVersion = '3.0.0'
 
 # Name of the Windows PowerShell host required by this module
 # PowerShellHostName = ''
@@ -51,7 +51,7 @@ Copyright = '(c) 2019-2020 Florian Carrier. All rights reserved.'
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-# RequiredModules = @()
+RequiredModules = @("PSTK")
 
 # Assemblies that must be loaded prior to importing this module
 # RequiredAssemblies = @()
@@ -69,16 +69,51 @@ Copyright = '(c) 2019-2020 Florian Carrier. All rights reserved.'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = '*'
+FunctionsToExport = @(
+  "Add-DataSource",
+  "Add-JDBCDriver",
+  "Add-Module",
+  "Add-SecurityRole",
+  "Add-User",
+  "Add-UserGroupRole",
+  "Disable-RBAC",
+  "Enable-RBAC",
+  "Grant-SecurityRole",
+  "Invoke-DeployWAR",
+  "Invoke-JBossClient",
+  "Invoke-ReloadServer",
+  "Invoke-UndeployWAR",
+  "Read-DeploymentStatus",
+  "Read-Resource",
+  "Read-ServerState",
+  "Remove-DataSource",
+  "Remove-JDBCDriver",
+  "Remove-Module",
+  "Remove-Resource",
+  "Remove-SecurityRole",
+  "Remove-User",
+  "Remove-UserGroupRole",
+  "Resolve-ServerState",
+  "Set-Interface",
+  "Set-JavaOptions",
+  "Set-PortNumber",
+  "Set-PortOffset",
+  "Test-JBossClientOutcome",
+  "Test-Module",
+  "Test-SecurityRole",
+  "Test-ServerState",
+  "Test-User",
+  "Test-UserGroupRole"
+)
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-CmdletsToExport = '*'
+CmdletsToExport = @()
 
 # Variables to export from this module
-VariablesToExport = '*'
+VariablesToExport = @()
 
 # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-AliasesToExport = '*'
+AliasesToExport = @()
 
 # DSC resources to export from this module
 # DscResourcesToExport = @()
@@ -95,7 +130,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('PowerShell', 'WildFly', 'JBoss', 'framework', 'utility')
+        Tags = @('PowerShell', 'PS', 'PoSH', 'WildFly', 'JBoss', 'framework', 'utility')
 
         # A URL to the license for this module.
         # LicenseUri = ''
@@ -107,7 +142,10 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = @'
+[1.0.0]
+Initial release
+'@
 
     } # End of PSData hashtable
 
