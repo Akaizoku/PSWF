@@ -1,10 +1,10 @@
-function Invoke-UndeployWAR {
+function Invoke-DeployApplication {
   <#
     .SYNOPSIS
-    Undeploy a WAR
+    Deploy an application
 
     .DESCRIPTION
-    Undeploy a web-application resource (WAR) file
+    Deploy an application resource file (WAR, EAR, JAR, SAR, etc.)
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -15,14 +15,20 @@ function Invoke-UndeployWAR {
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .PARAMETER Module
-    The module parameter corresponds to the name of the JDBC driver module.
+    .PARAMETER Application
+    The application parameter corresponds to the path to the application to deploy.
+
+    .PARAMETER Unmanaged
+    The unmanaged switch defines if the application should be deployed in unmanaged mode..
+
+    .PARAMETER Force
+    The force switch defines if the application should overwrite an existing file.
 
     .NOTES
-    File name:      Invoke-UndeployWAR.ps1
+    File name:      Invoke-DeployApplication.ps1
     Author:         Florian Carrier
     Creation date:  19/12/2019
-    Last modified:  19/12/2019
+    Last modified:  15/01/2020
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -56,37 +62,44 @@ function Invoke-UndeployWAR {
     [Parameter (
       Position    = 4,
       Mandatory   = $false,
-      HelpMessage = "Name of the WAR file"
+      HelpMessage = "Path to the application"
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $WAR
+    $Application,
+    [Parameter (
+      HelpMessage = "Unmanaged mode switch"
+    )]
+    [Switch]
+    $Unmanaged,
+    [Parameter (
+      HelpMessage = "Force switch"
+    )]
+    [Switch]
+    $Force
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+    # Web-application
+    $WebApp = Split-Path -Path $Application -Leaf
   }
   Process {
-    Write-Log -Type "INFO" -Object "Undeploy $WAR"
-    # Check if deployment exists
-    if ($PSBoundParameters.ContainsKey('Credentials')) {
-      $Check = Read-DeploymentStatus -Path $Path -Controller $Controller -WAR $WAR -Credentials $Credentials
-    } else {
-      $Check = Read-DeploymentStatus -Path $Path -Controller $Controller -WAR $WAR
+    # Define command
+    $Command = "deploy \""$Application\"""
+    # Add unmanaged switch if required
+    if ($Unmanaged) {
+      $Command = $Command + " --unmanaged"
     }
-    if ($Check -eq "MISSING") {
-      Write-Log -Type "WARN" -Object """$WAR"" is not deployed"
+    # Add force switch if required
+    if ($Force) {
+      $Command = $Command + " --force"
+    }
+    # Execute command
+    if ($PSBoundParameters.ContainsKey('Credentials')) {
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
     } else {
-      # Define command
-      $Command = "undeploy ""$WAR"""
-      # Execute command
-      if ($PSBoundParameters.ContainsKey('Credentials')) {
-        $UndeployWAR = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
-      } else {
-        $UndeployWAR = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
-      }
-      # Check outcome
-      Assert-JBossCliCmdOutcome -Log $UndeployWAR -Object $WAR -Verb "undeploy"
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
     }
   }
 }

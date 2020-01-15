@@ -1,10 +1,10 @@
-function Invoke-DeployWAR {
+function Invoke-UndeployApplication {
   <#
     .SYNOPSIS
-    Deploy a WAR
+    Undeploy an application
 
     .DESCRIPTION
-    Deploy a web-application resource (WAR) file
+    Undeploy an application resource file (WAR, EAR, JAR, SAR, etc.)
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -15,14 +15,14 @@ function Invoke-DeployWAR {
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .PARAMETER Module
-    The module parameter corresponds to the name of the JDBC driver module.
+    .PARAMETER Application
+    The application parameter corresponds to the name of the application to undeploy.
 
     .NOTES
-    File name:      Invoke-DeployWAR.ps1
+    File name:      Invoke-UndeployApplication.ps1
     Author:         Florian Carrier
     Creation date:  19/12/2019
-    Last modified:  19/12/2019
+    Last modified:  15/01/2020
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -56,38 +56,25 @@ function Invoke-DeployWAR {
     [Parameter (
       Position    = 4,
       Mandatory   = $false,
-      HelpMessage = "Path to the WAR file"
+      HelpMessage = "Name of the application"
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $WAR,
-    [Parameter (
-      HelpMessage = "Force switch"
-    )]
-    [Switch]
-    $Force
+    $Application
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
-    # Check path
-    if (-Not (Test-Path -Path $WAR)) {
-      Write-Log -Type "ERROR" -Object "Path not found $WAR" -ExitCode 1
-    }
-    # Web-application
-    $WebApp = Split-Path -Path $WAR -Leaf
   }
   Process {
-    Write-Log -Type "INFO" -Object "Deploy $WebApp"
     # Define command
-    $Command = "deploy ""$WAR"""
+    # WARNING Do not use quotes around the application name
+    $Command = "undeploy $Application"
     # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
-      $DeployWAR = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Force:$Force
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
     } else {
-      $DeployWAR = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Force:$Force
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
     }
-    # Check outcome
-    Assert-JBossCliCmdOutcome -Log $DeployWAR -Object $WebApp -Verb "deploy"
   }
 }
