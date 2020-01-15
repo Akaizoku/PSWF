@@ -25,7 +25,7 @@ function Invoke-JBossClient {
     File name:      Invoke-JBossClient.ps1
     Author:         Florian Carrier
     Creation date:  21/10/2019
-    Last modified:  06/12/2019
+    Last modified:  15/01/2020
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -65,11 +65,6 @@ function Invoke-JBossClient {
     [System.Management.Automation.PSCredential]
     $Credentials,
     [Parameter (
-      HelpMessage = "Force switch"
-    )]
-    [Switch]
-    $Force,
-    [Parameter (
       HelpMessage = "Switch to redirect error stream"
     )]
     [Switch]
@@ -83,10 +78,10 @@ function Invoke-JBossClient {
     # Check credentials
     if ($PSBoundParameters.ContainsKey("Credentials")) {
       # Construct JBoss client command with credential
-      $JBossCliCmd = Write-JBossClientCmd -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect:$Redirect -Force:$Force
+      $JBossCliCmd = Write-JBossClientCmd -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect:$Redirect
     } else {
       # Construct JBoss client command for local use
-      $JBossCliCmd =  Write-JBossClientCmd -Path $Path -Controller $Controller -Command $Command -Redirect:$Redirect -Force:$Force
+      $JBossCliCmd =  Write-JBossClientCmd -Path $Path -Controller $Controller -Command $Command -Redirect:$Redirect
     }
     # Execute command
     $JBossCliLog = Invoke-Expression -Command $JBossCliCmd | Out-String
