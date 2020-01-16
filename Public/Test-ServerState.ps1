@@ -18,11 +18,17 @@ function Test-ServerState {
     .PARAMETER State
     The optional state parameter corresponds to the expected server state. The default value is "running".
 
+    .INPUTS
+    None. You cannot pipe objects to Test-ServerState.
+
+    .OUTPUTS
+    Boolean. Test-ServerState returns a boolean depending if the server state matches the provided expected state.
+
     .NOTES
     File name:     Test-ServerState.ps1
     Author:        Florian Carrier
     Creation date: 09/01/2020
-    Last modified: 09/01/2020
+    Last modified: 15/01/2020
   #>
   Param(
     [Parameter (
@@ -66,15 +72,15 @@ function Test-ServerState {
   Process {
     # Read server state
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $ServerState = Read-ServerState -Path $Path -Controller $Controller -Credentials $Credentials
+      $ReadServerState = Read-ServerState -Path $Path -Controller $Controller -Credentials $Credentials
     } else {
-      $ServerState = Read-ServerState -Path $Path -Controller $Controller
+      $ReadServerState = Read-ServerState -Path $Path -Controller $Controller
     }
     # Check if read operation was successfull
-    if (Select-String -InputObject $ServerState -Pattern '"outcome" => "success"' -SimpleMatch -Quiet) {
+    if (Test-JBossClientOutcome -Log $ReadServerState) {
       # Check result
-      $Status = Select-String -InputObject $ServerState -Pattern '(?<=\"result\" \=\> ")(\w|-)*' -Encoding "UTF8" | ForEach-Object { $_.Matches.Value }
-      if ($Status -eq $State) {
+      $ServerState = Get-JBossClientResult -log $ReadServerState
+      if ($ServerState -eq $State) {
         # If server is running
         return $true
       } else {
