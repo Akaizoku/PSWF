@@ -31,8 +31,7 @@ function Add-User {
     File name:      Add-User.ps1
     Author:         Florian Carrier
     Creation date:  15/10/2019
-    Last modified:  09/01/2020
-    TODO            Check JBoss client script type (extension)
+    Last modified:  15/01/2020
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -74,21 +73,28 @@ function Add-User {
     )]
     [ValidateNotNullOrEmpty ()]
     [String]
-    $UserGroup
+    $UserGroup,
+    [Parameter (
+      HelpMessage = "Silent switch"
+    )]
+    [Switch]
+    $Silent
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    # Define JBoss client command
-    $AddUserCommand = "& ""$Path"" --user ""$($Credentials.UserName)"" --password ""$($Credentials.GetNetworkCredential().Password)"" --realm ""$Realm"" --silent"
-    # Add user group if applicable
+    # Construct command
     if ($PSBoundParameters.ContainsKey("UserGroup") -And ($UserGroup)) {
-      $AddUserCommand = $AddUserCommand + " --group ""$UserGroup"""
+      $AddUserCommand = Write-AddUserCmd -Path $Path -Credentials $Credentials -Realm $Realm -Silent:$Silent -UserGroup $UserGroup
+    } else {
+      $AddUserCommand = Write-AddUserCmd -Path $Path -Credentials $Credentials -Realm $Realm -Silent:$Silents
     }
-    Write-Log -Type "DEBUG" -Object $AddUserCommand -Obfuscate $Credentials.GetNetworkCredential().Password
-    # Execute add user command
-    Invoke-Expression -Command $AddUserCommand | Out-String
+    # Execute command
+    $AddUser = Invoke-Expression -Command $AddUserCommand | Out-String
+    Write-Log -Type "DEBUG" -Object $AddUser
+    # Return outcome
+    return $AddUser
   }
 }

@@ -1,10 +1,10 @@
 function Read-DeploymentStatus {
   <#
     .SYNOPSIS
-    Get deployment status
+    Read deployment status
 
     .DESCRIPTION
-    Get the status of the web-application deployed
+    Query the status of a deployed application
 
     .PARAMETER Path
     The optional path parameter corresponds to the path to the JBoss batch client.
@@ -12,14 +12,23 @@ function Read-DeploymentStatus {
     .PARAMETER Controller
     The controller parameter corresponds to the host to connect to.
 
-    .PARAMETER WAR
-    The WAR parameter corresponds to the name of the web-application deployed.
+    .PARAMETER Credentials
+    The optional credentials parameter correspond to the credentials of the account to use to connect to the JBoss instance.
+
+    .PARAMETER Application
+    The application parameter corresponds to the name of the application deployed.
+
+    .INPUTS
+    System.String. You can pipe the application name to Read-DeploymentStatus.
+
+    .OUTPUTS
+    System.String. Read-DeploymentStatus returns the raw output of the JBoss client.
 
     .NOTES
     File name:      Read-DeploymentStatus.ps1
     Author:         Florian Carrier
     Creation date:  20/12/2019
-    Last modified:  20/12/2019
+    Last modified:  15/01/2020
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -52,37 +61,27 @@ function Read-DeploymentStatus {
     $Credentials,
     [Parameter (
       Position    = 4,
-      Mandatory   = $false,
-      HelpMessage = "Name of the WAR file"
+      Mandatory   = $true,
+      HelpMessage = "Name of the application",
+      ValueFromPipeline               = $true,
+      ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $WAR
+    $Application
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Read deployment status attribute"
-    # Define command
-    $Command = "/deployment=""$WAR"":read-attribute(name=status)"
-    # Execute command
-    if ($PSBoundParameters.ContainsKey('Credentials')) {
-      $Status = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
+    # Define resource
+    $Resource = "/deployment=$Application"
+    # Query resource
+    if ($PSBoundParameters.ContainsKey("Credentials")) {
+      Read-Attribute -Path $Path -Controller $Controller -Resource $Resource -Attribute "status" -Credentials $Credentials
     } else {
-      $Status = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
-    }
-    # Check outcome
-    if (Select-String -InputObject $Status -Pattern '"outcome" => "success"' -SimpleMatch -Quiet) {
-      $Status = Select-String -InputObject $Status -Pattern '(?<=\"result\" \=\> ")(\w|-)*' -Encoding "UTF8" | ForEach-Object { $_.Matches.Value }
-      # Remove double-quotes and trim
-      $Status = $Status.Replace('"', '').Trim()
-      # Return status
-      return $Status
-    } else {
-      # Return missing status
-      return 'MISSING'
+      Read-Attribute -Path $Path -Controller $Controller -Resource $Resource -Attribute "status"
     }
   }
 }

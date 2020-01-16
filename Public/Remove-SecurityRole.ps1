@@ -28,10 +28,10 @@ function Remove-SecurityRole {
     File name:      Remove-SecurityRole.ps1
     Author:         Florian Carrier
     Creation date:  07/01/2020
-    Last modified:  07/01/2020
+    Last modified:  16/01/2020
 
     .LINK
-    Invoke-JBossClient
+    Remove-Resource
 
     .LINK
     Add-SecurityRole
@@ -45,7 +45,7 @@ function Remove-SecurityRole {
   Param (
     [Parameter (
       Position    = 1,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Path to the JBoss client"
     )]
     [ValidateNotNUllOrEmpty ()]
@@ -53,7 +53,7 @@ function Remove-SecurityRole {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -84,14 +84,13 @@ function Remove-SecurityRole {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Removing $Role role"
-    # Define JBoss client command
-    $Command = "/core-service=management/access=authorization/role-mapping=$($Role):remove"
-    # Execute command
+    # Define resource
+    $Resource = "/core-service=management/access=authorization/role-mapping=$($Role)"
+    # Remove resource
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
+      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
     } else {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
+      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource
     }
   }
 }

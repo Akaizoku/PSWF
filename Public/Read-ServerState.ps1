@@ -76,13 +76,11 @@ function Read-ServerState {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    # Define command
-    $Command = ':read-attribute(name=server-state)'
-    # Execute command
+    # Query server state
     if ($PSBoundParameters.ContainsKey('Credentials')) {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
+      Read-Attribute -Path $Path -Controller $Controller -Attribute "server-state" -Credentials $Credentials
     } else {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
+      Read-Attribute -Path $Path -Controller $Controller -Attribute "server-state"
     }
   }
 }
