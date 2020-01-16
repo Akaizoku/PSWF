@@ -28,10 +28,16 @@ function Read-Resource {
     File name:      Read-Resource.ps1
     Author:         Florian Carrier
     Creation date:  20/12/2019
-    Last modified:  07/01/2020
+    Last modified:  14/01/2020
 
     .LINK
     Invoke-JBossClient
+
+    .LINK
+    Test-Resource
+
+    .LINK
+    Remove-Resource
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -78,7 +84,6 @@ function Read-Resource {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Check $Resource resource"
     # Define command
     $Command = "$($Resource):read-resource()"
     # Execute command

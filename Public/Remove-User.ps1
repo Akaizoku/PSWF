@@ -28,7 +28,7 @@ function Remove-User {
     File name:      Remove-User.ps1
     Author:         Florian Carrier
     Creation date:  07/01/2020
-    Last modified:  09/01/2020
+    Last modified:  14/01/2020
 
     .LINK
     Add-User
@@ -93,7 +93,6 @@ function Remove-User {
     }
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Removing $Username user from $Realm realm"
     # Check that user configuration file exists
     if (Test-Path -Path $ConfigurationFile) {
       # Load user configuration
