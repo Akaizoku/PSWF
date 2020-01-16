@@ -28,7 +28,7 @@ function Add-SecurityRole {
     File name:      Add-SecurityRole.ps1
     Author:         Florian Carrier
     Creation date:  21/10/2019
-    Last modified:  08/01/2020
+    Last modified:  14/01/2020
 
     .LINK
     Invoke-JBossClient

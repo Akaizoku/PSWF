@@ -28,7 +28,7 @@ function Remove-DataSource {
     File name:      Remove-DataSource.ps1
     Author:         Florian Carrier
     Creation date:  19/12/2019
-    Last modified:  06/01/2020
+    Last modified:  14/01/2020
 
     .LINK
     Invoke-JBossClient
@@ -78,14 +78,13 @@ function Remove-DataSource {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Removing $DataSource data-source"
-    # Define JBoss client command
-    $Command = "/subsystem=datasources/data-source=""$DataSource"":remove()"
-    # Execute command
+    # Define resource
+    $Resource = "/subsystem=datasources/data-source=\""$DataSource\"""
+    # Remove resource
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
+      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
     } else {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
+      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource
     }
   }
 }

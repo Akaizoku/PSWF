@@ -34,7 +34,7 @@ function Remove-Module {
     File name:      Remove-Module.ps1
     Author:         Florian Carrier
     Creation date:  06/01/2020
-    Last modified:  06/01/2020
+    Last modified:  15/01/2020
 
     .LINK
     Invoke-JBossClient
@@ -90,10 +90,9 @@ function Remove-Module {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Removing $Module module"
     # Define JBoss client command
-    # WARNING Use single quotes around dependencies to avoid parsing issue in case it contains a comma
-    $Command = "module remove --name=""$Module"""
+    # WARNING No quotes around the module name
+    $Command = "module remove --name=$Module"
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials

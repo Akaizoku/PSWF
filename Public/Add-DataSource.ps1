@@ -43,7 +43,7 @@ function Add-DataSource {
     File name:      Add-DataSource.ps1
     Author:         Florian Carrier
     Creation date:  16/12/2019
-    Last modified:  06/01/2020
+    Last modified:  14/01/2020
     WARNING         This currently does not work if the connection URL contains a reference to the database itself (";databaseName=<dbname>")
 
     .LINK
@@ -133,9 +133,8 @@ function Add-DataSource {
     $JNDIName = "java:/jdbc/$DataSource"
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Creating $DataSource data-source"
     # Define JBoss client command
-    $Command = "/subsystem=datasources/data-source=""$DataSource"":add(enabled=""$Enabled"", jndi-name=""$JNDIName"", driver-name=""$Driver"", connection-url=""$ConnectionURL"", user-name=""$UserName"", password=""$Password"")"
+    $Command = "/subsystem=datasources/data-source=\""$DataSource\"":add(enabled=\""$Enabled\"", jndi-name=\""$JNDIName\"", driver-name=\""$Driver\"", connection-url=\""$ConnectionURL\"", user-name=\""$UserName\"", password=\""$Password\"")"
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
