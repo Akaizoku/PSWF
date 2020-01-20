@@ -12,7 +12,7 @@
 RootModule = 'PSWF.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.0'
+ModuleVersion = '1.0.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -30,7 +30,7 @@ CompanyName = 'Florian Carrier'
 Copyright = '(c) 2019-2020 Florian Carrier. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'PowerShell framework to manage WildFly web-application server.'
+Description = 'PowerShell framework to manage WildFly application server.'
 
 # Minimum version of the Windows PowerShell engine required by this module
 PowerShellVersion = '3.0.0'
@@ -78,11 +78,13 @@ FunctionsToExport = @(
   "Add-UserGroupRole",
   "Disable-RBAC",
   "Enable-RBAC",
+  "Get-DeploymentStatus",
   "Grant-SecurityRole",
-  "Invoke-DeployWAR",
+  "Invoke-DeployApplication",
   "Invoke-JBossClient",
   "Invoke-ReloadServer",
-  "Invoke-UndeployWAR",
+  "Invoke-UndeployApplication",
+  "Read-Attribute",
   "Read-DeploymentStatus",
   "Read-Resource",
   "Read-ServerState",
@@ -94,12 +96,12 @@ FunctionsToExport = @(
   "Remove-User",
   "Remove-UserGroupRole",
   "Resolve-ServerState",
-  "Set-Interface",
-  "Set-JavaOptions",
-  "Set-PortNumber",
-  "Set-PortOffset",
+  "Test-DataSource",
+  "Test-Deployment",
   "Test-JBossClientOutcome",
+  "Test-JDBCDriver",
   "Test-Module",
+  "Test-Resource",
   "Test-SecurityRole",
   "Test-ServerState",
   "Test-User",
@@ -143,8 +145,8 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-[1.0.0]
-Initial release
+[1.0.1]
+Bug fixes and improvements
 '@
 
     } # End of PSData hashtable
