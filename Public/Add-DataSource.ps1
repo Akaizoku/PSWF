@@ -34,7 +34,7 @@ function Add-DataSource {
     The disabled switch specifies whether the data-source should be disabled or not.
 
     .INPUTS
-    None. You cannot pipe objects to Add-DataSource.DESCRIPTION
+    None. You cannot pipe objects to Add-DataSource.
 
     .OUTPUTS
     System.String. Add-DataSource returns the raw output from the JBoss client.
@@ -43,14 +43,22 @@ function Add-DataSource {
     File name:      Add-DataSource.ps1
     Author:         Florian Carrier
     Creation date:  16/12/2019
-    Last modified:  14/01/2020
-    WARNING         This currently does not work if the connection URL contains a reference to the database itself (";databaseName=<dbname>")
+    Last modified:  21/01/2020
+    TODO            - Add support for check-valid-connection-sql configuration
+                    - Add warnings if all validation parameters are not provided
 
     .LINK
-    Invoke-JBossClient
+    Add-Resource
+
+    .LINK
+    Test-DataSource
+
+    .LINK
+    Remove-DataSource
   #>
   [CmdletBinding (
-    SupportsShouldProcess = $true
+    SupportsShouldProcess   = $true,
+    DefaultParameterSetName = "security"
   )]
   Param (
     [Parameter (
@@ -103,26 +111,63 @@ function Add-DataSource {
     [String]
     $ConnectionURL,
     [Parameter (
-      Position    = 7,
-      Mandatory   = $true,
-      HelpMessage = "Name of the data-source user account"
+      Position          = 7,
+      Mandatory         = $true,
+      HelpMessage       = "Name of the data-source user account",
+      ParameterSetName  = "security"
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
     $UserName,
     [Parameter (
-      Position    = 8,
-      Mandatory   = $true,
-      HelpMessage = "Password of the data-source user account"
+      Position          = 8,
+      Mandatory         = $true,
+      HelpMessage       = "Password of the data-source user account",
+      ParameterSetName  = "security"
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
     $Password,
     [Parameter (
+      Position          = 7,
+      Mandatory         = $true,
+      HelpMessage       = "Name of the security domain of the data-source",
+      ParameterSetName  = "security-domain"
+    )]
+    [ValidateNotNUllOrEmpty ()]
+    [String]
+    $SecurityDomain,
+    [Parameter (
+      Position          = 9,
+      Mandatory         = $false,
+      HelpMessage       = "Name of the connection checker Java class to use to validate the connection"
+    )]
+    [ValidateNotNUllOrEmpty ()]
+    [String]
+    $ConnectionChecker,
+    [Parameter (
+      Position          = 10,
+      Mandatory         = $false,
+      HelpMessage       = "Name of the exception sorter Java class to use"
+    )]
+    [ValidateNotNUllOrEmpty ()]
+    [String]
+    $ExceptionSorter,
+    [Parameter (
       HelpMessage = "Switch to disable the data-source"
     )]
     [Switch]
-    $Disabled
+    $Disabled,
+    [Parameter (
+      HelpMessage = "Switch to enable data-source staistics"
+    )]
+    [Switch]
+    $EnableStatistics,
+    [Parameter (
+      HelpMessage = "Switch to configure the connection validation to run in the background"
+    )]
+    [Switch]
+    $BackgroundValidation
   )
   Begin {
     # Get global preference variables
@@ -133,13 +178,37 @@ function Add-DataSource {
     $JNDIName = "java:/jdbc/$DataSource"
   }
   Process {
-    # Define JBoss client command
-    $Command = "/subsystem=datasources/data-source=\""$DataSource\"":add(enabled=\""$Enabled\"", jndi-name=\""$JNDIName\"", driver-name=\""$Driver\"", connection-url=\""$ConnectionURL\"", user-name=\""$UserName\"", password=\""$Password\"")"
-    # Execute command
+    # Define resource
+    $Resource = "/subsystem=datasources/data-source=\""$DataSource\"""
+    # Define base parameters
+    $Parameters = "enabled=\""$Enabled\"", jndi-name=\""$JNDIName\"", driver-name=\""$Driver\"", connection-url=\""$ConnectionURL\"""
+    # Add security parameters
+    switch ($PsCmdlet.ParameterSetName) {
+      "security" {
+        $Parameters = $Parameters + ", user-name=\""$UserName\"", password=\""$Password\"""
+      }
+      "security-domain" {
+        $Parameters = $Parameters + ", security-domain=\""$SecurityDomain\"""
+      }
+    }
+    # Add validation parameters
+    if ($PSBoundParameters.ContainsKey("ConnectionChecker") -And ($PSBoundParameters.ContainsKey("ExceptionSorter"))) {
+      $Parameters = $Parameters + ", valid-connection-checker-class-name=\""$ConnectionChecker\"", exception-sorter-class-name=\""$ExceptionSorter\"""
+      if ($BackgroundValidation) {
+        $Parameters = $Parameters + ", validate-on-match=$false, background-validation=$true"
+      } else {
+        $Parameters = $Parameters + ", validate-on-match=$true, background-validation=$false"
+      }
+    }
+    # Data-source statistics
+    if ($PSBoundParameters.ContainsKey("EnableStatistics")) {
+      $Parameters = $Parameters + ", statistics-enabled=$true"
+    }
+    # Add data-source
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
+      Add-Resource -Path $Path -Controller $Controller -Resource $Resource -Parameters $Parameters -Credentials $Credentials
     } else {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
+      Add-Resource -Path $Path -Controller $Controller -Resource $Resource -Parameters $Parameters
     }
   }
 }
