@@ -1,10 +1,10 @@
-function Read-Attribute {
+function Write-Attribute {
   <#
     .SYNOPSIS
-    Read attribute
+    Write attribute
 
     .DESCRIPTION
-    Query an attribute of a resource on a JBoss instance
+    Add an attibute to a specified resource on a JBoss instance
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss batch client.
@@ -16,28 +16,31 @@ function Read-Attribute {
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
     .PARAMETER Resource
-    The optional resource parameter corresponds to the path to the resource.
+    The resource parameter corresponds to the path to the resource.
 
     .PARAMETER Attribute
     The attribute parameter corresponds to the name of the attribute.
 
+    .PARAMETER Value
+    The value parameter corresponds to the value of the attribute to write.
+
     .INPUTS
-    System.String. You can pipe the resource path and attribute name to Read-Attribute.
+    System.String. You can pipe the resource name, attribute name, and attribute value to Write-Attribute.
 
     .OUTPUTS
-    System.String. Read-Attribute returns the raw output from the JBoss client.
+    System.String. Write-Attribute returns the raw output from the JBoss client.
 
     .NOTES
-    File name:      Read-Attribute.ps1
+    File name:      Write-Attribute.ps1
     Author:         Florian Carrier
-    Creation date:  15/01/2020
+    Creation date:  21/01/2020
     Last modified:  21/01/2020
 
     .LINK
     Invoke-JBossClient
 
     .LINK
-    Test-Attribute
+    Read-Attribute
 
     .LINK
     Remove-Attribute
@@ -89,8 +92,19 @@ function Read-Attribute {
       ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
+    [Alias ("Name")]
     [String]
-    $Attribute
+    $Attribute,
+    [Parameter (
+      Position    = 6,
+      Mandatory   = $true,
+      HelpMessage = "Value of the attribute",
+      ValueFromPipeline               = $true,
+      ValueFromPipelineByPropertyName = $true
+    )]
+    [ValidateNotNUllOrEmpty ()]
+    [String]
+    $Value
   )
   Begin {
     # Get global preference variables
@@ -98,7 +112,7 @@ function Read-Attribute {
   }
   Process {
     # Define command
-    $Command = "$($Resource):read-attribute(name=$Attribute)"
+    $Command = "$($Resource):write-attribute(name=$Attribute,value=$Value)"
     # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials

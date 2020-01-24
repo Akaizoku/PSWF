@@ -1,10 +1,10 @@
-function Read-Attribute {
+function Remove-Attribute {
   <#
     .SYNOPSIS
-    Read attribute
+    Remove attribute
 
     .DESCRIPTION
-    Query an attribute of a resource on a JBoss instance
+    Remove an attribute of a resource from a JBoss instance
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss batch client.
@@ -22,25 +22,25 @@ function Read-Attribute {
     The attribute parameter corresponds to the name of the attribute.
 
     .INPUTS
-    System.String. You can pipe the resource path and attribute name to Read-Attribute.
+    System.String. You can pipe the resource path and attribute name to Remove-Attribute.
 
     .OUTPUTS
-    System.String. Read-Attribute returns the raw output from the JBoss client.
+    System.String. Remove-Attribute returns the raw output from the JBoss client.
 
     .NOTES
-    File name:      Read-Attribute.ps1
+    File name:      Remove-Attribute.ps1
     Author:         Florian Carrier
-    Creation date:  15/01/2020
+    Creation date:  21/01/2020
     Last modified:  21/01/2020
 
     .LINK
     Invoke-JBossClient
 
     .LINK
-    Test-Attribute
+    Add-Attribute
 
     .LINK
-    Remove-Attribute
+    Write-Attribute
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -98,7 +98,7 @@ function Read-Attribute {
   }
   Process {
     # Define command
-    $Command = "$($Resource):read-attribute(name=$Attribute)"
+    $Command = "$($Resource):undefine-attribute(name=$Attribute)"
     # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
