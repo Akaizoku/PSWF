@@ -22,13 +22,13 @@ function Test-SecurityRole {
     System.String. You can pipe the role name to Test-SecurityRole.
 
     .OUTPUTS
-    System.String. Test-SecurityRole returns the raw output from the JBoss client.
+    Boolean. Test-SecurityRole returns a boolean depnding if the security role exists.
 
     .NOTES
     File name:      Test-SecurityRole.ps1
     Author:         Florian Carrier
     Creation date:  07/01/2020
-    Last modified:  07/01/2020
+    Last modified:  15/01/2020
 
     .LINK
     Invoke-JBossClient
@@ -84,20 +84,13 @@ function Test-SecurityRole {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Checking $Role role"
-    # Define role resource path
+    # Define resource
     $Resource = "/core-service=management/access=authorization/role-mapping=$($Role)"
     # Check resource
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $Outcome = Read-Resource -Path $Path -Controller $Controller -Credentials $Credentials -Resource $Resource
+      Test-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
     } else {
-      $Outcome = Read-Resource -Path $Path -Controller $Controller -Resource $Resource
-    }
-    # Parse outcome
-    if (Select-String -InputObject $Outcome -Pattern '"outcome" => "success"' -SimpleMatch -Quiet) {
-      return $true
-    } else {
-      return $false
+      Test-Resource -Path $Path -Controller $Controller -Resource $Resource
     }
   }
 }

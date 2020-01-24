@@ -12,7 +12,7 @@
 RootModule = 'PSWF.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.0'
+ModuleVersion = '1.0.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -30,7 +30,7 @@ CompanyName = 'Florian Carrier'
 Copyright = '(c) 2019-2020 Florian Carrier. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'PowerShell framework to manage WildFly web-application server.'
+Description = 'PowerShell framework to manage WildFly application server.'
 
 # Minimum version of the Windows PowerShell engine required by this module
 PowerShellVersion = '3.0.0'
@@ -73,37 +73,51 @@ FunctionsToExport = @(
   "Add-DataSource",
   "Add-JDBCDriver",
   "Add-Module",
+  "Add-Resource",
+  "Add-SecurityDomain",
   "Add-SecurityRole",
   "Add-User",
   "Add-UserGroupRole",
+  "Disable-DataSource",
+  "Disable-Deployment",
   "Disable-RBAC",
+  "Enable-DataSource",
+  "Enable-Deployment",
   "Enable-RBAC",
+  "Get-DeploymentStatus",
   "Grant-SecurityRole",
-  "Invoke-DeployWAR",
+  "Invoke-DeployApplication",
   "Invoke-JBossClient",
   "Invoke-ReloadServer",
-  "Invoke-UndeployWAR",
+  "Invoke-UndeployApplication",
+  "Read-Attribute",
   "Read-DeploymentStatus",
   "Read-Resource",
+  "Read-SecurityDomain",
   "Read-ServerState",
+  "Remove-Attribute",
   "Remove-DataSource",
   "Remove-JDBCDriver",
   "Remove-Module",
   "Remove-Resource",
+  "Remove-SecurityDomain",
   "Remove-SecurityRole",
   "Remove-User",
   "Remove-UserGroupRole",
   "Resolve-ServerState",
-  "Set-Interface",
-  "Set-JavaOptions",
-  "Set-PortNumber",
-  "Set-PortOffset",
+  "Test-DataSource",
+  "Test-DataSourceConnection",
+  "Test-Deployment",
   "Test-JBossClientOutcome",
+  "Test-JDBCDriver",
   "Test-Module",
+  "Test-Resource",
+  "Test-SecurityDomain",
   "Test-SecurityRole",
   "Test-ServerState",
   "Test-User",
-  "Test-UserGroupRole"
+  "Test-UserGroupRole",
+  "Write-Attribute"
 )
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
@@ -133,7 +147,7 @@ PrivateData = @{
         Tags = @('PowerShell', 'PS', 'PoSH', 'WildFly', 'JBoss', 'framework', 'utility')
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/Akaizoku/PSWF/blob/master/LICENSE'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/Akaizoku/PSWF'
@@ -143,8 +157,8 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-[1.0.0]
-Initial release
+[1.0.1]
+Bug fixes and improvements
 '@
 
     } # End of PSData hashtable

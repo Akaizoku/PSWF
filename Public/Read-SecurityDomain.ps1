@@ -1,10 +1,10 @@
-function Remove-SecurityRole {
+function Read-SecurityDomain {
   <#
     .SYNOPSIS
-    Remove security role
+    Read security domain
 
     .DESCRIPTION
-    Remove a new role to the role-based access security system of WildFly
+    Read a security domain from a JBoss instance
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -15,29 +15,32 @@ function Remove-SecurityRole {
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .PARAMETER Role
-    The role parameter corresponds to the name of the role to remove.
+    .PARAMETER SecurityDomain
+    The security domain parameter corresponds to the name of the security domain to read.
 
     .INPUTS
-    System.String. You can pipe the role name to Remove-SecurityRole.
+    None. You can pipe the name of the security domain to Read-SecurityDomain.
 
     .OUTPUTS
-    System.String. Remove-SecurityRole returns the raw output from the JBoss client.
+    System.String. Read-SecurityDomain returns the raw output from the JBoss client.
 
     .NOTES
-    File name:      Remove-SecurityRole.ps1
+    File name:      Read-SecurityDomain.ps1
     Author:         Florian Carrier
-    Creation date:  07/01/2020
-    Last modified:  16/01/2020
+    Creation date:  20/01/2020
+    Last modified:  20/01/2020
 
     .LINK
-    Remove-Resource
+    Read-Resource
 
     .LINK
-    Add-SecurityRole
+    Add-SecurityDomain
 
     .LINK
-    Test-SecurityRole
+    Test-SecurityDomain
+
+    .LINK
+    Remove-SecurityDomain
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -71,13 +74,13 @@ function Remove-SecurityRole {
     [Parameter (
       Position    = 4,
       Mandatory   = $true,
-      HelpMessage = "Name of the role to be removed",
+      HelpMessage = "Name of the security domain to be created",
       ValueFromPipeline               = $true,
       ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $Role
+    $SecurityDomain
   )
   Begin {
     # Get global preference variables
@@ -85,12 +88,12 @@ function Remove-SecurityRole {
   }
   Process {
     # Define resource
-    $Resource = "/core-service=management/access=authorization/role-mapping=$($Role)"
-    # Remove resource
+    $Resource = "/subsystem=security/security-domain=$SecurityDomain"
+    # Read resource
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
+      Read-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
     } else {
-      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource
+      Read-Resource -Path $Path -Controller $Controller -Resource $Resource
     }
   }
 }

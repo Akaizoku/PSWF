@@ -32,19 +32,25 @@ function Add-Module {
 
     .EXAMPLE
 
-    Add-JDBCDriver -Path "C:\WKFS\WildFly\bin\jboss-cli.ps1" -Controller "127.0.0.1:9990" -Driver "mssql" -Module "mssql.jdbc" -Class "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    Add-Module -Path "C:\WildFly\bin\jboss-cli.ps1" -Controller "127.0.0.1:9990" -Module "mssql.jdbc" -Resource "C:\Modules\sqljdbc42.jar"
 
-    In this example, Add-JDBCDriver will add a new driver with the name mssql using the module mssql.jdbc and the class com.microsoft.sqlserver.jdbc.SQLServerDriver to the JBoss server specified by the local controller.
+    In this example, Add-Module will create a new module named mssql.jdbc containing the files located in "C:\Modules\sqljdbc42.jar".
 
     .NOTES
     File name:      Add-Module.ps1
     Author:         Florian Carrier
     Creation date:  19/12/2019
-    Last modified:  07/01/2020
-    WARNING         Do not use quotes around dependencies. The values should not contain spaces and the comma prevents the use of double-quotes.
+    Last modified:  15/01/2020
+    Remark:         If the add module operation is successful, no output will be produced. Use Test-Module to validate the outcome.
 
     .LINK
     Invoke-JBossClient
+
+    .LINK
+    Test-Module
+
+    .LINK
+    Remove-Module
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -93,7 +99,7 @@ function Add-Module {
     $Resources,
     [Parameter (
       Position    = 6,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Dependencies"
     )]
     [ValidateNotNUllOrEmpty ()]
@@ -105,9 +111,14 @@ function Add-Module {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Adding $Module module"
     # Define JBoss client command
-    $Command = "module add --name=""$Module"" --resources=""$Resources"" --dependencies=$Dependencies"
+    # WARNING No quotes around the module name as it is used as-is for the directory structure creation
+    $Command = "module add --name=$Module --resources=\""$Resources\"""
+    # Add dependencies if required
+    if ($PSBoundParameters.ContainsKey("Dependencies")) {
+      # WARNING No quotes around the dependencies else "&quot;" will be added in the module dependency XML node
+      $Command = $Command + " --dependencies=$Dependencies"
+    }
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials

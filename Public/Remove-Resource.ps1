@@ -16,13 +16,28 @@ function Remove-Resource {
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
     .PARAMETER Resource
-    The resource parameter corresponds to the path to the resource
+    The resource parameter corresponds to the path to the resource to remove.
+
+    .INPUTS
+    System.String. You can pipe the resource path to Remove-Resource.
+
+    .OUTPUTS
+    System.String. Remove-Resource returns the raw output from the JBoss client.
 
     .NOTES
     File name:      Remove-Resource.ps1
     Author:         Florian Carrier
     Creation date:  20/12/2019
-    Last modified:  20/12/2019
+    Last modified:  14/01/2020
+
+    .LINK
+    Invoke-JBossClient
+
+    .LINK
+    Add-Resource
+
+    .LINK
+    Test-Resource
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -56,7 +71,9 @@ function Remove-Resource {
     [Parameter (
       Position    = 4,
       Mandatory   = $true,
-      HelpMessage = "Path to the resource"
+      HelpMessage = "Path to the resource",
+      ValueFromPipeline               = $true,
+      ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
@@ -67,26 +84,13 @@ function Remove-Resource {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Remove $Resource resource"
-    # Check if resource exists
+    # Define command
+    $RemoveCommand = "$($Resource):remove()"
+    # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
-      $ReadResource = Read-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $RemoveCommand -Credentials $Credentials
     } else {
-      $ReadResource = Read-Resource -Path $Path -Controller $Controller -Resource $Resource
-    }
-    if ($ReadResource) {
-      # Define command
-      $RemoveCommand = "$($Resource):remove()"
-      # Execute command
-      if ($PSBoundParameters.ContainsKey('Credentials')) {
-        $RemoveResource = Invoke-JBossClient -Path $Path -Controller $Controller -Command $RemoveCommand -Credentials $Credentials
-      } else {
-        $RemoveResource = Invoke-JBossClient -Path $Path -Controller $Controller -Command $RemoveCommand
-      }
-      # Check outcome
-      Assert-JBossCliCmdOutcome -Log $RemoveResource -Object "$Resource resource" -Verb "remove"
-    } else {
-      Write-Log -Type "WARN" -Object "$Resource resource does not exist"
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $RemoveCommand
     }
   }
 }

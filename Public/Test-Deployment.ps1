@@ -1,10 +1,10 @@
-function Test-ServerState {
+function Test-Deployment {
   <#
     .SYNOPSIS
-    Test JBoss server state
+    Test deployment
 
     .DESCRIPTION
-    Check the state of a JBoss server
+    Check the state of an application deployment
 
     .PARAMETER Path
     The optional path parameter corresponds to the path to the JBoss batch client.
@@ -15,19 +15,22 @@ function Test-ServerState {
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to the JBoss instance.
 
+    .PARAMETER Application
+    The application parameter corresponds to the name of the application deployment to check.
+
     .PARAMETER State
-    The optional state parameter corresponds to the expected server state. The default value is "running".
+    The optional state parameter corresponds to the expected server state. The default value is "OK".
 
     .INPUTS
-    None. You cannot pipe objects to Test-ServerState.
+    System.String. You can pipe the application name to Test-Deployment.
 
     .OUTPUTS
-    Boolean. Test-ServerState returns a boolean depending if the server state matches the provided expected state.
+    Boolean. Test-Deployment returns a boolean depending if the deployment state matches the provided expected state.
 
     .NOTES
-    File name:     Test-ServerState.ps1
+    File name:     Test-Deployment.ps1
     Author:        Florian Carrier
-    Creation date: 09/01/2020
+    Creation date: 15/01/2020
     Last modified: 15/01/2020
   #>
   Param(
@@ -59,33 +62,38 @@ function Test-ServerState {
     [Parameter (
       Position    = 4,
       Mandatory   = $false,
+      HelpMessage = "Name of the application",
+      ValueFromPipeline               = $true,
+      ValueFromPipelineByPropertyName = $true
+    )]
+    [ValidateNotNUllOrEmpty ()]
+    [String]
+    $Application,
+    [Parameter (
+      Position    = 5,
+      Mandatory   = $false,
       HelpMessage = "Expected server state"
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $State = "running"
+    $State = "OK"
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    # Read server state
+    # Define resource
+    $Resource = "/deployment=$Application"
+    # Query resource
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $ReadServerState = Read-ServerState -Path $Path -Controller $Controller -Credentials $Credentials
+      $DeploymentStatus = Read-Attribute -Path $Path -Controller $Controller -Resource $Resource -Attribute "status" -Credentials $Credentials
     } else {
-      $ReadServerState = Read-ServerState -Path $Path -Controller $Controller
+      $DeploymentStatus = Read-Attribute -Path $Path -Controller $Controller -Resource $Resource -Attribute "status"
     }
-    # Check if read operation was successfull
-    if (Test-JBossClientOutcome -Log $ReadServerState) {
-      # Check result
-      $ServerState = Get-JBossClientResult -log $ReadServerState
-      if ($ServerState -eq $State) {
-        # If server is running
-        return $true
-      } else {
-        return $false
-      }
+    # Check outcome
+    if (Test-JBossClientOutcome -Log $DeploymentStatus) {
+      return $true
     } else {
       return $false
     }

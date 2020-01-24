@@ -34,7 +34,7 @@ function Add-JDBCDriver {
     File name:      Add-JDBCDriver.ps1
     Author:         Florian Carrier
     Creation date:  19/12/2019
-    Last modified:  06/01/2020
+    Last modified:  14/01/2020
 
     .LINK
     Invoke-JBossClient
@@ -98,9 +98,8 @@ function Add-JDBCDriver {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Adding $Driver JDBC driver"
     # Define JBoss client command
-    $Command = "/subsystem=datasources/jdbc-driver=""$Driver"":add(driver-module-name=""$Module"",driver-name=""$Driver"",driver-class-name=""$Class"")"
+    $Command = "/subsystem=datasources/jdbc-driver=\""$Driver\"":add(driver-module-name=\""$Module\"",driver-name=\""$Driver\"",driver-class-name=\""$Class\"")"
     # Execute command
     if ($PSBoundParameters.ContainsKey("Credentials")) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials

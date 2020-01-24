@@ -28,7 +28,7 @@ function Remove-JDBCDriver {
     File name:      Remove-JDBCDriver.ps1
     Author:         Florian Carrier
     Creation date:  20/12/2019
-    Last modified:  06/01/2020
+    Last modified:  14/01/2020
 
     .LINK
     Invoke-JBossClient
@@ -79,18 +79,15 @@ function Remove-JDBCDriver {
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
-    # Resource
-    $Resource = "/subsystem=datasources/jdbc-driver=""$Driver"""
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Removing $Driver JDBC driver"
-    # Define JBoss client command
-    $RemoveCommand = "$($Resource):remove()"
-    # Execute command
+    # Define resource
+    $Resource = "/subsystem=datasources/jdbc-driver=\""$Driver\"""
+    # Remove resource
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $RemoveJDBCDriver = Invoke-JBossClient -Path $Path -Controller $Controller -Command $RemoveCommand -Credentials $Credentials
+      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
     } else {
-      $RemoveJDBCDriver = Invoke-JBossClient -Path $Path -Controller $Controller -Command $RemoveCommand
+      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource
     }
   }
 }

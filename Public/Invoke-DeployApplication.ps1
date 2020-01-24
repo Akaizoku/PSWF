@@ -1,43 +1,34 @@
-function Read-Resource {
+function Invoke-DeployApplication {
   <#
     .SYNOPSIS
-    Read resource
+    Deploy an application
 
     .DESCRIPTION
-    Check if a resource exists on a JBoss web-application server
+    Deploy an application resource file (WAR, EAR, JAR, SAR, etc.)
 
     .PARAMETER Path
-    The path parameter corresponds to the path to the JBoss batch client.
+    The path parameter corresponds to the path to the JBoss client.
 
     .PARAMETER Controller
-    The controller parameter corresponds to the host to connect to.
+    The controller parameter corresponds to the hostname and port of the JBoss host.
 
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .PARAMETER Resource
-    The resource parameter corresponds to the path to the resource.
+    .PARAMETER Application
+    The application parameter corresponds to the path to the application to deploy.
 
-    .INPUTS
-    System.String. You can pipe the resource path to Read-Resource.
+    .PARAMETER Unmanaged
+    The unmanaged switch defines if the application should be deployed in unmanaged mode..
 
-    .OUTPUTS
-    System.String. Read-Resource returns the raw output from the JBoss client.
+    .PARAMETER Force
+    The force switch defines if the application should overwrite an existing file.
 
     .NOTES
-    File name:      Read-Resource.ps1
+    File name:      Invoke-DeployApplication.ps1
     Author:         Florian Carrier
-    Creation date:  20/12/2019
-    Last modified:  14/01/2020
-
-    .LINK
-    Invoke-JBossClient
-
-    .LINK
-    Test-Resource
-
-    .LINK
-    Remove-Resource
+    Creation date:  19/12/2019
+    Last modified:  15/01/2020
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -45,7 +36,7 @@ function Read-Resource {
   Param (
     [Parameter (
       Position    = 1,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Path to the JBoss client"
     )]
     [ValidateNotNUllOrEmpty ()]
@@ -53,7 +44,7 @@ function Read-Resource {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -70,22 +61,40 @@ function Read-Resource {
     $Credentials,
     [Parameter (
       Position    = 4,
-      Mandatory   = $true,
-      HelpMessage = "Path to the resource",
-      ValueFromPipeline               = $true,
-      ValueFromPipelineByPropertyName = $true
+      Mandatory   = $false,
+      HelpMessage = "Path to the application"
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $Resource
+    $Application,
+    [Parameter (
+      HelpMessage = "Unmanaged mode switch"
+    )]
+    [Switch]
+    $Unmanaged,
+    [Parameter (
+      HelpMessage = "Force switch"
+    )]
+    [Switch]
+    $Force
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+    # Web-application
+    $WebApp = Split-Path -Path $Application -Leaf
   }
   Process {
     # Define command
-    $Command = "$($Resource):read-resource()"
+    $Command = "deploy \""$Application\"""
+    # Add unmanaged switch if required
+    if ($Unmanaged) {
+      $Command = $Command + " --unmanaged"
+    }
+    # Add force switch if required
+    if ($Force) {
+      $Command = $Command + " --force"
+    }
     # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials

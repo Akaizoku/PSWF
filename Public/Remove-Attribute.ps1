@@ -1,10 +1,10 @@
-function Read-Resource {
+function Remove-Attribute {
   <#
     .SYNOPSIS
-    Read resource
+    Remove attribute
 
     .DESCRIPTION
-    Check if a resource exists on a JBoss web-application server
+    Remove an attribute of a resource from a JBoss instance
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss batch client.
@@ -16,28 +16,31 @@ function Read-Resource {
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
     .PARAMETER Resource
-    The resource parameter corresponds to the path to the resource.
+    The optional resource parameter corresponds to the path to the resource.
+
+    .PARAMETER Attribute
+    The attribute parameter corresponds to the name of the attribute.
 
     .INPUTS
-    System.String. You can pipe the resource path to Read-Resource.
+    System.String. You can pipe the resource path and attribute name to Remove-Attribute.
 
     .OUTPUTS
-    System.String. Read-Resource returns the raw output from the JBoss client.
+    System.String. Remove-Attribute returns the raw output from the JBoss client.
 
     .NOTES
-    File name:      Read-Resource.ps1
+    File name:      Remove-Attribute.ps1
     Author:         Florian Carrier
-    Creation date:  20/12/2019
-    Last modified:  14/01/2020
+    Creation date:  21/01/2020
+    Last modified:  21/01/2020
 
     .LINK
     Invoke-JBossClient
 
     .LINK
-    Test-Resource
+    Add-Attribute
 
     .LINK
-    Remove-Resource
+    Write-Attribute
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -70,14 +73,24 @@ function Read-Resource {
     $Credentials,
     [Parameter (
       Position    = 4,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Path to the resource",
+      ValueFromPipeline               = $true,
+      ValueFromPipelineByPropertyName = $true
+    )]
+    [ValidateNotNull ()]
+    [String]
+    $Resource = '',
+    [Parameter (
+      Position    = 5,
+      Mandatory   = $true,
+      HelpMessage = "Name of the attribute",
       ValueFromPipeline               = $true,
       ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $Resource
+    $Attribute
   )
   Begin {
     # Get global preference variables
@@ -85,7 +98,7 @@ function Read-Resource {
   }
   Process {
     # Define command
-    $Command = "$($Resource):read-resource()"
+    $Command = "$($Resource):undefine-attribute(name=$Attribute)"
     # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials

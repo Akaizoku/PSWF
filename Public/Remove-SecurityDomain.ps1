@@ -1,10 +1,10 @@
-function Invoke-DeployWAR {
+function Remove-SecurityDomain {
   <#
     .SYNOPSIS
-    Deploy a WAR
+    Remove security domain
 
     .DESCRIPTION
-    Deploy a web-application resource (WAR) file
+    Remove a security domain from a JBoss instance
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -15,14 +15,32 @@ function Invoke-DeployWAR {
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .PARAMETER Module
-    The module parameter corresponds to the name of the JDBC driver module.
+    .PARAMETER SecurityDomain
+    The security domain parameter corresponds to the name of the security domain to create.
+
+    .INPUTS
+    None. You can pipe the name of the security domain to Remove-SecurityDomain.
+
+    .OUTPUTS
+    System.String. Remove-SecurityDomain returns the raw output from the JBoss client.
 
     .NOTES
-    File name:      Invoke-DeployWAR.ps1
+    File name:      Remove-SecurityDomain.ps1
     Author:         Florian Carrier
-    Creation date:  19/12/2019
-    Last modified:  19/12/2019
+    Creation date:  20/01/2020
+    Last modified:  20/01/2020
+
+    .LINK
+    Remove-Resource
+
+    .LINK
+    Add-SecurityDomain
+
+    .LINK
+    Read-SecurityDomain
+
+    .LINK
+    Test-SecurityDomain
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -30,7 +48,7 @@ function Invoke-DeployWAR {
   Param (
     [Parameter (
       Position    = 1,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Path to the JBoss client"
     )]
     [ValidateNotNUllOrEmpty ()]
@@ -38,7 +56,7 @@ function Invoke-DeployWAR {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -55,39 +73,27 @@ function Invoke-DeployWAR {
     $Credentials,
     [Parameter (
       Position    = 4,
-      Mandatory   = $false,
-      HelpMessage = "Path to the WAR file"
+      Mandatory   = $true,
+      HelpMessage = "Name of the security domain to be created",
+      ValueFromPipeline               = $true,
+      ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $WAR,
-    [Parameter (
-      HelpMessage = "Force switch"
-    )]
-    [Switch]
-    $Force
+    $SecurityDomain
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
-    # Check path
-    if (-Not (Test-Path -Path $WAR)) {
-      Write-Log -Type "ERROR" -Object "Path not found $WAR" -ExitCode 1
-    }
-    # Web-application
-    $WebApp = Split-Path -Path $WAR -Leaf
   }
   Process {
-    Write-Log -Type "INFO" -Object "Deploy $WebApp"
-    # Define command
-    $Command = "deploy ""$WAR"""
-    # Execute command
-    if ($PSBoundParameters.ContainsKey('Credentials')) {
-      $DeployWAR = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Force:$Force
+    # Define resource
+    $Resource = "/subsystem=security/security-domain=$SecurityDomain"
+    # Remove resource
+    if ($PSBoundParameters.ContainsKey("Credentials")) {
+      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
     } else {
-      $DeployWAR = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Force:$Force
+      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource
     }
-    # Check outcome
-    Assert-JBossCliCmdOutcome -Log $DeployWAR -Object $WebApp -Verb "deploy"
   }
 }

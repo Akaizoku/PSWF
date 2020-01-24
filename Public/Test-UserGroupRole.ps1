@@ -25,13 +25,13 @@ function Test-UserGroupRole {
     System.String. You can pipe the role name to Test-UserGroupRole.
 
     .OUTPUTS
-    System.String. Test-UserGroupRole returns the raw output from the JBoss client.
+    Boolean. Test-UserGroupRole returns a boolean depnding if the user-group to role mapping is defined.
 
     .NOTES
     File name:      Test-UserGroupRole.ps1
     Author:         Florian Carrier
     Creation date:  07/01/2020
-    Last modified:  07/01/2020
+    Last modified:  15/01/2020
 
     .LINK
     Invoke-JBossClient
@@ -97,14 +97,13 @@ function Test-UserGroupRole {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Checking $UserGroup user-group in $Role role"
-    # Define JBoss client command
+    # Define resource
     $Resource = "/core-service=management/access=authorization/role-mapping=$($Role)/include=group-$($UserGroup)"
-    # Execute command
+    # Check resource
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      Read-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
+      Test-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
     } else {
-      Read-Resource -Path $Path -Controller $Controller -Resource $Resource
+      Test-Resource -Path $Path -Controller $Controller -Resource $Resource
     }
   }
 }

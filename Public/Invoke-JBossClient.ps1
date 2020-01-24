@@ -25,7 +25,7 @@ function Invoke-JBossClient {
     File name:      Invoke-JBossClient.ps1
     Author:         Florian Carrier
     Creation date:  21/10/2019
-    Last modified:  06/12/2019
+    Last modified:  22/01/2020
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -41,7 +41,7 @@ function Invoke-JBossClient {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -65,11 +65,6 @@ function Invoke-JBossClient {
     [System.Management.Automation.PSCredential]
     $Credentials,
     [Parameter (
-      HelpMessage = "Force switch"
-    )]
-    [Switch]
-    $Force,
-    [Parameter (
       HelpMessage = "Switch to redirect error stream"
     )]
     [Switch]
@@ -80,13 +75,25 @@ function Invoke-JBossClient {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    # Check credentials
-    if ($PSBoundParameters.ContainsKey("Credentials")) {
-      # Construct JBoss client command with credential
-      $JBossCliCmd = Write-JBossClientCmd -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect:$Redirect -Force:$Force
+    # Check controller
+    if ($PSBoundParameters.ContainsKey("Controller")) {
+      # Remote controller
+      if ($PSBoundParameters.ContainsKey("Credentials")) {
+        # Construct JBoss client command for remote controller with credentials
+        $JBossCliCmd = Write-JBossClientCmd -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect:$Redirect
+      } else {
+        # Construct JBoss client command for remote controller with local user
+        $JBossCliCmd = Write-JBossClientCmd -Path $Path -Controller $Controller -Command $Command -Redirect:$Redirect
+      }
     } else {
-      # Construct JBoss client command for local use
-      $JBossCliCmd =  Write-JBossClientCmd -Path $Path -Controller $Controller -Command $Command -Redirect:$Redirect -Force:$Force
+      # Local controller
+      if ($PSBoundParameters.ContainsKey("Credentials")) {
+        # Construct JBoss client command with credentials
+        $JBossCliCmd = Write-JBossClientCmd -Path $Path -Command $Command -Credentials $Credentials -Redirect:$Redirect
+      } else {
+        # Construct JBoss client command with local user
+        $JBossCliCmd = Write-JBossClientCmd -Path $Path -Command $Command -Redirect:$Redirect
+      }
     }
     # Execute command
     $JBossCliLog = Invoke-Expression -Command $JBossCliCmd | Out-String

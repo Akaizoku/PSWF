@@ -1,13 +1,13 @@
-function Add-User {
+function Write-AddUserCmd {
   <#
     .SYNOPSIS
-    Add user
+    Construct Add-User script command
 
     .DESCRIPTION
-    Add a user to a JBoss instance
+    Generate command to call the JBoss Add-User script.
 
     .PARAMETER Path
-    The path parameter corresponds to the path to the add-user script.
+    The path parameter corresponds to the path to the Add-User script.
 
     .PARAMETER Credentials
     The credentials parameter corresponds to the credentials of the user to be created.
@@ -16,22 +16,23 @@ function Add-User {
     The realm parameter corresponds to the realm in which to add the user.
     There are two available realm:
     1. ApplicationRealm
-    2. ManagementRealm (default value)
+    2. ManagementRealm
 
     .PARAMETER UserGroup
     The optional user group parameter corresponds to the name of the user group to assign the user to.
 
     .INPUTS
-    System.Management.Automation.PSCredential. You can pipe the credentials of the user to Add-User.
+    System.Management.Automation.PSCredential. You can pipe the credentials of the user to Write-AddUserCmd.
 
     .OUTPUTS
-    System.String. Add-User returns the raw output of the add-user script.
+    System.String. Write-AddUserCmd returns the Add-User formatted command.
 
     .NOTES
-    File name:      Add-User.ps1
+    File name:      Write-AddUserCmd.ps1
     Author:         Florian Carrier
-    Creation date:  15/10/2019
+    Creation date:  14/01/2020
     Last modified:  15/01/2020
+    TODO            Check JBoss client script type (extension)
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -57,7 +58,7 @@ function Add-User {
     $Credentials,
     [Parameter (
       Position    = 3,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Realm in which to add the user"
     )]
     [ValidateSet (
@@ -65,7 +66,7 @@ function Add-User {
       "ManagementRealm"
     )]
     [String]
-    $Realm = "ManagementRealm",
+    $Realm,
     [Parameter (
       Position    = 4,
       Mandatory   = $false,
@@ -85,16 +86,19 @@ function Add-User {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    # Construct command
+    # Define command
+    $Command = "& ""$Path"" --user ""$($Credentials.UserName)"" --password ""$($Credentials.GetNetworkCredential().Password)"" --realm ""$Realm"""
+    # Add user group if applicable
     if ($PSBoundParameters.ContainsKey("UserGroup") -And ($UserGroup)) {
-      $AddUserCommand = Write-AddUserCmd -Path $Path -Credentials $Credentials -Realm $Realm -Silent:$Silent -UserGroup $UserGroup
-    } else {
-      $AddUserCommand = Write-AddUserCmd -Path $Path -Credentials $Credentials -Realm $Realm -Silent:$Silents
+      $Command = $Command + " --group ""$UserGroup"""
     }
-    # Execute command
-    $AddUser = Invoke-Expression -Command $AddUserCommand | Out-String
-    Write-Log -Type "DEBUG" -Object $AddUser
-    # Return outcome
-    return $AddUser
+    # Add silent switch if applicable
+    if ($Silent) {
+      $Command = $Command + " --silent"
+    }
+    # Debugging with obfuscation
+    Write-Log -Type "DEBUG" -Object $Command -Obfuscate $Credentials.GetNetworkCredential().Password
+    # Return command
+    return $Command
   }
 }

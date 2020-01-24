@@ -1,10 +1,10 @@
-function Remove-SecurityRole {
+function Test-DataSource {
   <#
     .SYNOPSIS
-    Remove security role
+    Test data-source
 
     .DESCRIPTION
-    Remove a new role to the role-based access security system of WildFly
+    Check if a data-source exists on a JBoss web-application server
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -15,29 +15,29 @@ function Remove-SecurityRole {
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .PARAMETER Role
-    The role parameter corresponds to the name of the role to remove.
+    .PARAMETER DataSource
+    The data-source parameter corresponds to the name of the data-source to check.
 
     .INPUTS
-    System.String. You can pipe the role name to Remove-SecurityRole.
+    System.String. You can pipe the data-source name to Test-DataSource.
 
     .OUTPUTS
-    System.String. Remove-SecurityRole returns the raw output from the JBoss client.
+    Boolean. Test-DataSource returns a boolean depending if the data-source exists.
 
     .NOTES
-    File name:      Remove-SecurityRole.ps1
+    File name:      Test-DataSource.ps1
     Author:         Florian Carrier
-    Creation date:  07/01/2020
-    Last modified:  16/01/2020
+    Creation date:  15/01/2020
+    Last modified:  15/01/2020
 
     .LINK
-    Remove-Resource
+    Invoke-JBossClient
 
     .LINK
-    Add-SecurityRole
+    Add-DataSource
 
     .LINK
-    Test-SecurityRole
+    Remove-DataSource
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -45,7 +45,7 @@ function Remove-SecurityRole {
   Param (
     [Parameter (
       Position    = 1,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Path to the JBoss client"
     )]
     [ValidateNotNUllOrEmpty ()]
@@ -53,7 +53,7 @@ function Remove-SecurityRole {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -71,13 +71,13 @@ function Remove-SecurityRole {
     [Parameter (
       Position    = 4,
       Mandatory   = $true,
-      HelpMessage = "Name of the role to be removed",
+      HelpMessage = "Name of the data-source to check",
       ValueFromPipeline               = $true,
       ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $Role
+    $DataSource
   )
   Begin {
     # Get global preference variables
@@ -85,12 +85,12 @@ function Remove-SecurityRole {
   }
   Process {
     # Define resource
-    $Resource = "/core-service=management/access=authorization/role-mapping=$($Role)"
-    # Remove resource
+    $Resource = "/subsystem=datasources/data-source=\""$DataSource\"""
+    # Check resource
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
+      Test-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
     } else {
-      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource
+      Test-Resource -Path $Path -Controller $Controller -Resource $Resource
     }
   }
 }

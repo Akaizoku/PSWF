@@ -25,8 +25,8 @@ function Write-JBossClientCmd {
     File name:      Write-JBossClientCmd.ps1
     Author:         Florian Carrier
     Creation date:  21/10/2019
-    Last modified:  17/12/2019
-    TODO:           - Handle path with spaces
+    Last modified:  15/01/2020
+    TODO:           - Handle path with spaces with batch script
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -66,11 +66,6 @@ function Write-JBossClientCmd {
     [System.Management.Automation.PSCredential]
     $Credentials,
     [Parameter (
-      HelpMessage = "Force switch"
-    )]
-    [Switch]
-    $Force,
-    [Parameter (
       HelpMessage = "Switch to redirect error stream"
     )]
     [Switch]
@@ -98,18 +93,14 @@ function Write-JBossClientCmd {
     $Baseline = "--connect"
     # Add controller (if provided)
     if ($PSBoundParameters.ContainsKey("Controller")) {
-      $Baseline = $Baseline + " --controller=""$Controller"""
+      $Baseline = $Baseline + " --controller='$Controller'"
     }
     # Add credentials (if provided)
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      $Baseline = $Baseline + " --user=""$($Credentials.UserName)"" --password=""$($Credentials.GetNetworkCredential().Password)"""
+      $Baseline = $Baseline + " --user='$($Credentials.UserName)' --password='$($Credentials.GetNetworkCredential().Password)'"
     }
     # Add command parameter
-    $CommandLine = $Baseline + " --command=""$Command"""
-    # Force switch
-    if ($Force) {
-      $CommandLine = $CommandLine + " --force"
-    }
+    $CommandLine = $Baseline + " --command='$Command'"
     # Check JBoss client type (extension)
     $Extension = $Path.SubString($Path.LastIndexOf("."), $Path.Length - $Path.LastIndexOf("."))
     switch ($Extension) {

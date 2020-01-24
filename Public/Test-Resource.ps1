@@ -1,43 +1,43 @@
-function Remove-SecurityRole {
+function Test-Resource {
   <#
     .SYNOPSIS
-    Remove security role
+    Test resource
 
     .DESCRIPTION
-    Remove a new role to the role-based access security system of WildFly
+    Check if a resource exists on a JBoss web-application server
 
     .PARAMETER Path
-    The path parameter corresponds to the path to the JBoss client.
+    The path parameter corresponds to the path to the JBoss batch client.
 
     .PARAMETER Controller
-    The controller parameter corresponds to the hostname and port of the JBoss host.
+    The controller parameter corresponds to the host to connect to.
 
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .PARAMETER Role
-    The role parameter corresponds to the name of the role to remove.
+    .PARAMETER Resource
+    The resource parameter corresponds to the path to the resource.
 
     .INPUTS
-    System.String. You can pipe the role name to Remove-SecurityRole.
+    System.String. You can pipe the resource path to Test-Resource.
 
     .OUTPUTS
-    System.String. Remove-SecurityRole returns the raw output from the JBoss client.
+    System.String. Test-Resource returns the raw output from the JBoss client.
 
     .NOTES
-    File name:      Remove-SecurityRole.ps1
+    File name:      Test-Resource.ps1
     Author:         Florian Carrier
-    Creation date:  07/01/2020
-    Last modified:  16/01/2020
+    Creation date:  14/01/2020
+    Last modified:  14/01/2020
+
+    .LINK
+    Invoke-JBossClient
+
+    .LINK
+    Read-Resource
 
     .LINK
     Remove-Resource
-
-    .LINK
-    Add-SecurityRole
-
-    .LINK
-    Test-SecurityRole
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -71,26 +71,30 @@ function Remove-SecurityRole {
     [Parameter (
       Position    = 4,
       Mandatory   = $true,
-      HelpMessage = "Name of the role to be removed",
+      HelpMessage = "Path to the resource",
       ValueFromPipeline               = $true,
       ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $Role
+    $Resource
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    # Define resource
-    $Resource = "/core-service=management/access=authorization/role-mapping=$($Role)"
-    # Remove resource
-    if ($PSBoundParameters.ContainsKey("Credentials")) {
-      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
+    # Query resource
+    if ($PSBoundParameters.ContainsKey('Credentials')) {
+      $ReadResource = Read-Resource -Path $Path -Controller $Controller -Credentials $Credentials -Resource $Resource
     } else {
-      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource
+      $ReadResource = Read-Resource -Path $Path -Controller $Controller -Resource $Resource
+    }
+    # Check if resource exists
+    if (Test-JBossClientOutcome -Log $ReadResource) {
+      return $true
+    } else {
+      return $false
     }
   }
 }

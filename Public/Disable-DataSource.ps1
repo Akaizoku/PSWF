@@ -1,10 +1,10 @@
-function Remove-SecurityRole {
+function Disable-DataSource {
   <#
     .SYNOPSIS
-    Remove security role
+    Disable data-source
 
     .DESCRIPTION
-    Remove a new role to the role-based access security system of WildFly
+    Disable a data-source from a JBoss instance
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -15,29 +15,23 @@ function Remove-SecurityRole {
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .PARAMETER Role
-    The role parameter corresponds to the name of the role to remove.
+    .PARAMETER DataSource
+    The data-source parameter corresponds to the name of the data source to disable.
 
     .INPUTS
-    System.String. You can pipe the role name to Remove-SecurityRole.
+    System.String. You can pipe the data-source name to Disable-DataSource.
 
     .OUTPUTS
-    System.String. Remove-SecurityRole returns the raw output from the JBoss client.
+    System.String. Disable-DataSource returns the raw output of the JBoss client command.
 
     .NOTES
-    File name:      Remove-SecurityRole.ps1
+    File name:      Disable-DataSource.ps1
     Author:         Florian Carrier
-    Creation date:  07/01/2020
-    Last modified:  16/01/2020
+    Creation date:  22/01/2020
+    Last modified:  22/01/2020
 
     .LINK
-    Remove-Resource
-
-    .LINK
-    Add-SecurityRole
-
-    .LINK
-    Test-SecurityRole
+    Invoke-JBossClient
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -53,7 +47,7 @@ function Remove-SecurityRole {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -71,26 +65,34 @@ function Remove-SecurityRole {
     [Parameter (
       Position    = 4,
       Mandatory   = $true,
-      HelpMessage = "Name of the role to be removed",
+      HelpMessage = "Name of the data source to disable",
       ValueFromPipeline               = $true,
       ValueFromPipelineByPropertyName = $true
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $Role
+    $DataSource
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    # Define resource
-    $Resource = "/core-service=management/access=authorization/role-mapping=$($Role)"
-    # Remove resource
-    if ($PSBoundParameters.ContainsKey("Credentials")) {
-      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
+    # Define command
+    $Command = "/subsystem=datasources/data-source=\""$DataSource\"":disable()"
+    # Run command
+    if ($PSBoundParameters.ContainsKey("Controller")) {
+      if ($PSBoundParameters.ContainsKey("Credentials")) {
+        Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
+      } else {
+        Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
+      }
     } else {
-      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource
+      if ($PSBoundParameters.ContainsKey("Credentials")) {
+        Invoke-JBossClient -Path $Path -Command $Command -Credentials $Credentials
+      } else {
+        Invoke-JBossClient -Path $Path -Command $Command
+      }
     }
   }
 }

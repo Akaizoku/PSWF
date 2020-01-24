@@ -22,7 +22,7 @@ function Test-Module {
     File name:      Test-Module.ps1
     Author:         Florian Carrier
     Creation date:  06/01/2020
-    Last modified:  07/01/2020
+    Last modified:  14/01/2020
     WARNING         Values passed from pipeline can only be used in the process section
 
     .LINK
@@ -56,7 +56,6 @@ function Test-Module {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Testing $Module module"
     # Define module path
     $ModulePath = Join-Path -Path $JBossHome -ChildPath "modules"
     foreach ($Directory in $Module.Split(".")) {
@@ -64,6 +63,10 @@ function Test-Module {
     }
     # Test module path
     Write-Log -Type "DEBUG" -Object $ModulePath
-    Test-Path -Path $ModulePath
+    if (Test-Path -Path $ModulePath) {
+      return $true
+    } else {
+      return $false
+    }
   }
 }

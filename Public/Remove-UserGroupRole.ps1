@@ -31,10 +31,10 @@ function Remove-UserGroupRole {
     File name:      Remove-UserGroupRole.ps1
     Author:         Florian Carrier
     Creation date:  07/01/2020
-    Last modified:  08/01/2020
+    Last modified:  16/01/2020
 
     .LINK
-    Invoke-JBossClient
+    Remove-Resource
 
     .LINK
     Add-UserGroupRole
@@ -105,14 +105,13 @@ function Remove-UserGroupRole {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Removeing $UserGroup user-group to $Role role"
-    # Define JBoss client command
-    $Command = "/core-service=management/access=authorization/role-mapping=$($Role)/include=group-$($UserGroup):remove()"
-    # Execute command
+    # Define resource
+    $Resource = "/core-service=management/access=authorization/role-mapping=$($Role)/include=group-$($UserGroup)"
+    # Remove resource
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
+      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
     } else {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
+      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource
     }
   }
 }

@@ -1,10 +1,10 @@
-function Read-Resource {
+function Add-Resource {
   <#
     .SYNOPSIS
-    Read resource
+    Add resource
 
     .DESCRIPTION
-    Check if a resource exists on a JBoss web-application server
+    Add a resource to a JBoss instance
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss batch client.
@@ -18,20 +18,26 @@ function Read-Resource {
     .PARAMETER Resource
     The resource parameter corresponds to the path to the resource.
 
+    .PARAMETER Parameters
+    The parameters parameter corresponds to the configuration of the resource to create.
+
     .INPUTS
-    System.String. You can pipe the resource path to Read-Resource.
+    System.String. You can pipe the resource path to Add-Resource.
 
     .OUTPUTS
-    System.String. Read-Resource returns the raw output from the JBoss client.
+    System.String. Add-Resource returns the raw output from the JBoss client.
 
     .NOTES
-    File name:      Read-Resource.ps1
+    File name:      Add-Resource.ps1
     Author:         Florian Carrier
-    Creation date:  20/12/2019
-    Last modified:  14/01/2020
+    Creation date:  20/01/2020
+    Last modified:  20/01/2020
 
     .LINK
     Invoke-JBossClient
+
+    .LINK
+    Read-Resource
 
     .LINK
     Test-Resource
@@ -77,7 +83,15 @@ function Read-Resource {
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $Resource
+    $Resource,
+    [Parameter (
+      Position    = 5,
+      Mandatory   = $false,
+      HelpMessage = "Resource parameters"
+    )]
+    [ValidateNotNUllOrEmpty ()]
+    [String]
+    $Parameters
   )
   Begin {
     # Get global preference variables
@@ -85,7 +99,11 @@ function Read-Resource {
   }
   Process {
     # Define command
-    $Command = "$($Resource):read-resource()"
+    if ($PSBoundParameters.ContainsKey("Parameters")) {
+      $Command = "$($Resource):add($Parameters)"
+    } else {
+      $Command = "$($Resource):add()"
+    }
     # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials

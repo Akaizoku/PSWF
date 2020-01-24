@@ -105,7 +105,6 @@ function Add-UserGroupRole {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "DEBUG" -Object "Adding $UserGroup user-group to $Role role"
     # Define JBoss client command
     $Command = "/core-service=management/access=authorization/role-mapping=$($Role)/include=group-$($UserGroup):add(name=$($UserGroup),type=GROUP,realm=$($Realm))"
     # Execute command

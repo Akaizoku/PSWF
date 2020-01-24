@@ -1,10 +1,10 @@
-function Invoke-UndeployWAR {
+function Disable-Deployment {
   <#
     .SYNOPSIS
-    Undeploy a WAR
+    Disable deployment
 
     .DESCRIPTION
-    Undeploy a web-application resource (WAR) file
+    Disable a deployed application from a JBoss instance
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -15,14 +15,14 @@ function Invoke-UndeployWAR {
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .PARAMETER Module
-    The module parameter corresponds to the name of the JDBC driver module.
+    .PARAMETER Application
+    The application parameter corresponds to the name of the application to disable.
 
     .NOTES
-    File name:      Invoke-UndeployWAR.ps1
+    File name:      Disable-Deployment.ps1
     Author:         Florian Carrier
-    Creation date:  19/12/2019
-    Last modified:  19/12/2019
+    Creation date:  21/01/2020
+    Last modified:  21/01/2020
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -56,37 +56,25 @@ function Invoke-UndeployWAR {
     [Parameter (
       Position    = 4,
       Mandatory   = $false,
-      HelpMessage = "Name of the WAR file"
+      HelpMessage = "Name of the application"
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $WAR
+    $Application
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    Write-Log -Type "INFO" -Object "Undeploy $WAR"
-    # Check if deployment exists
+    # Define command
+    # WARNING Do not use quotes around the application name
+    $Command = "undeploy --name=$Application --keep-content"
+    # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
-      $Check = Read-DeploymentStatus -Path $Path -Controller $Controller -WAR $WAR -Credentials $Credentials
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
     } else {
-      $Check = Read-DeploymentStatus -Path $Path -Controller $Controller -WAR $WAR
-    }
-    if ($Check -eq "MISSING") {
-      Write-Log -Type "WARN" -Object """$WAR"" is not deployed"
-    } else {
-      # Define command
-      $Command = "undeploy ""$WAR"""
-      # Execute command
-      if ($PSBoundParameters.ContainsKey('Credentials')) {
-        $UndeployWAR = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
-      } else {
-        $UndeployWAR = Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
-      }
-      # Check outcome
-      Assert-JBossCliCmdOutcome -Log $UndeployWAR -Object $WAR -Verb "undeploy"
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
     }
   }
 }

@@ -1,10 +1,10 @@
-function Remove-SecurityRole {
+function Enable-Deployment {
   <#
     .SYNOPSIS
-    Remove security role
+    Enable deployment
 
     .DESCRIPTION
-    Remove a new role to the role-based access security system of WildFly
+    Enable a deployed application from a JBoss instance
 
     .PARAMETER Path
     The path parameter corresponds to the path to the JBoss client.
@@ -15,29 +15,14 @@ function Remove-SecurityRole {
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
 
-    .PARAMETER Role
-    The role parameter corresponds to the name of the role to remove.
-
-    .INPUTS
-    System.String. You can pipe the role name to Remove-SecurityRole.
-
-    .OUTPUTS
-    System.String. Remove-SecurityRole returns the raw output from the JBoss client.
+    .PARAMETER Application
+    The application parameter corresponds to the name of the application to Enable.
 
     .NOTES
-    File name:      Remove-SecurityRole.ps1
+    File name:      Enable-Deployment.ps1
     Author:         Florian Carrier
-    Creation date:  07/01/2020
-    Last modified:  16/01/2020
-
-    .LINK
-    Remove-Resource
-
-    .LINK
-    Add-SecurityRole
-
-    .LINK
-    Test-SecurityRole
+    Creation date:  21/01/2020
+    Last modified:  21/01/2020
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -45,7 +30,7 @@ function Remove-SecurityRole {
   Param (
     [Parameter (
       Position    = 1,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Path to the JBoss client"
     )]
     [ValidateNotNUllOrEmpty ()]
@@ -53,7 +38,7 @@ function Remove-SecurityRole {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -70,27 +55,26 @@ function Remove-SecurityRole {
     $Credentials,
     [Parameter (
       Position    = 4,
-      Mandatory   = $true,
-      HelpMessage = "Name of the role to be removed",
-      ValueFromPipeline               = $true,
-      ValueFromPipelineByPropertyName = $true
+      Mandatory   = $false,
+      HelpMessage = "Name of the application"
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
-    $Role
+    $Application
   )
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    # Define resource
-    $Resource = "/core-service=management/access=authorization/role-mapping=$($Role)"
-    # Remove resource
-    if ($PSBoundParameters.ContainsKey("Credentials")) {
-      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource -Credentials $Credentials
+    # Define command
+    # WARNING Do not use quotes around the application name
+    $Command = "deploy --name=$Application"
+    # Execute command
+    if ($PSBoundParameters.ContainsKey('Credentials')) {
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
     } else {
-      Remove-Resource -Path $Path -Controller $Controller -Resource $Resource
+      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
     }
   }
 }

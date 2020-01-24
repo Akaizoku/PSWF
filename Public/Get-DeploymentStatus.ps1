@@ -1,10 +1,10 @@
-function Read-DeploymentStatus {
+function Get-DeploymentStatus {
   <#
     .SYNOPSIS
-    Read deployment status
+    Get deployment status
 
     .DESCRIPTION
-    Query the status of a deployed application
+    Get the status of a deployed application
 
     .PARAMETER Path
     The optional path parameter corresponds to the path to the JBoss batch client.
@@ -12,23 +12,32 @@ function Read-DeploymentStatus {
     .PARAMETER Controller
     The controller parameter corresponds to the host to connect to.
 
-    .PARAMETER Credentials
-    The optional credentials parameter correspond to the credentials of the account to use to connect to the JBoss instance.
-
     .PARAMETER Application
     The application parameter corresponds to the name of the application deployed.
 
     .INPUTS
-    System.String. You can pipe the application name to Read-DeploymentStatus.
+    None. You cannot pipe object to Get-DeploymentStatus.
 
     .OUTPUTS
-    System.String. Read-DeploymentStatus returns the raw output of the JBoss client.
+    System.String. Get-DeploymentStatus returns the status of the deployment.
+
+    The possible values are:
+    - OK:       indicates that the application is up and running.
+    - FAILED:   indicates a dependency is missing or a service could not start.
+    - STOPPED:  indicates that the application is not enabled or was manually stopped.
+    - KO:       indicates that the application is not deployed.
 
     .NOTES
-    File name:      Read-DeploymentStatus.ps1
+    File name:      Get-DeploymentStatus.ps1
     Author:         Florian Carrier
-    Creation date:  20/12/2019
+    Creation date:  15/01/2020
     Last modified:  15/01/2020
+
+    .LINK
+    Read-DeploymentStatus
+
+    .LINK
+    Get-JBossClientResult
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -62,9 +71,7 @@ function Read-DeploymentStatus {
     [Parameter (
       Position    = 4,
       Mandatory   = $true,
-      HelpMessage = "Name of the application",
-      ValueFromPipeline               = $true,
-      ValueFromPipelineByPropertyName = $true
+      HelpMessage = "Name of the application"
     )]
     [ValidateNotNUllOrEmpty ()]
     [String]
@@ -79,9 +86,17 @@ function Read-DeploymentStatus {
     $Resource = "/deployment=$Application"
     # Query resource
     if ($PSBoundParameters.ContainsKey("Credentials")) {
-      Read-Attribute -Path $Path -Controller $Controller -Resource $Resource -Attribute "status" -Credentials $Credentials
+      $DeploymentStatus = Read-DeploymentStatus -Path $Path -Controller $Controller -Application $Application -Credentials $Credentials
     } else {
-      Read-Attribute -Path $Path -Controller $Controller -Resource $Resource -Attribute "status"
+      $DeploymentStatus = Read-DeploymentStatus -Path $Path -Controller $Controller -Application $Application
+    }
+    # Get result
+    $Result = Get-JBossClientResult -Log $DeploymentStatus
+    if ($Result) {
+      return $Result
+    } else {
+      # If application is not deployed
+      return "KO"
     }
   }
 }
