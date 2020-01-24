@@ -69,7 +69,7 @@ function Invoke-UndeployApplication {
   Process {
     # Define command
     # WARNING Do not use quotes around the application name
-    $Command = "undeploy $Application"
+    $Command = "undeploy --name=$Application"
     # Execute command
     if ($PSBoundParameters.ContainsKey('Credentials')) {
       Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
