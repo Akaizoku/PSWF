@@ -25,7 +25,7 @@ function Invoke-JBossClient {
     File name:      Invoke-JBossClient.ps1
     Author:         Florian Carrier
     Creation date:  21/10/2019
-    Last modified:  22/01/2020
+    Last modified:  28/01/2020
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -33,7 +33,7 @@ function Invoke-JBossClient {
   Param (
     [Parameter (
       Position    = 1,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Path to the JBoss client"
     )]
     [ValidateNotNUllOrEmpty ()]
@@ -75,6 +75,18 @@ function Invoke-JBossClient {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
+    # JBoss client path
+    if ($PSBoundParameters.ContainsKey('Path')) {
+      # Check path
+      if (-Not (Test-Path -Path $Path)) {
+        return "Path not found $Path"
+        exit 1
+      }
+    } else {
+      # Use PATH environment variable
+      Write-Log -Type "WARN" -Object "No path was provided, using PATH environment variable"
+      $Path = 'jboss-cli.ps1'
+    }
     # Check controller
     if ($PSBoundParameters.ContainsKey("Controller")) {
       # Remote controller
@@ -96,8 +108,13 @@ function Invoke-JBossClient {
       }
     }
     # Execute command
-    $JBossCliLog = Invoke-Expression -Command $JBossCliCmd | Out-String
-    Write-Log -Type "DEBUG" -Object $JBossCliLog
+    try {
+      $JBossCliLog = Invoke-Expression -Command $JBossCliCmd | Out-String
+      Write-Log -Type "DEBUG" -Object $JBossCliLog
+    } catch {
+      return $Error[0].Exception
+      exit 1
+    }
     # Return log
     return $JBossCliLog
   }
