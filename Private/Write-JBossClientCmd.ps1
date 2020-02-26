@@ -25,8 +25,9 @@ function Write-JBossClientCmd {
     File name:      Write-JBossClientCmd.ps1
     Author:         Florian Carrier
     Creation date:  21/10/2019
-    Last modified:  15/01/2020
+    Last modified:  28/01/2020
     TODO:           - Handle path with spaces with batch script
+                    - Prevent pause with batch script
   #>
   [CmdletBinding (
     SupportsShouldProcess = $true
@@ -34,7 +35,7 @@ function Write-JBossClientCmd {
   Param (
     [Parameter (
       Position    = 1,
-      Mandatory   = $false,
+      Mandatory   = $true,
       HelpMessage = "Path to JBoss client"
     )]
     [ValidateNotNUllOrEmpty ()]
@@ -74,13 +75,6 @@ function Write-JBossClientCmd {
   Begin {
     # Get global preference variables
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
-    # JBoss client path
-    if ($PSBoundParameters.ContainsKey('Path')) {
-      $JBossCliPath = $Path
-    } else {
-      # Use PATH environment variable
-      $JBossCliPath = 'jboss-cli.bat'
-    }
     # Batch command error stream redirection
     if ($Redirect) {
       $Redirection = "2>&1"
@@ -113,10 +107,6 @@ function Write-JBossClientCmd {
         $JBossCliCmd = "& ""$Path"" $CommandLine".Trim()
       }
       default {
-        # If path exists
-        if ($JBossClient) {
-          Write-Log -Type "ERROR" -Object "Unsupported JBoss client type ($Extension)"
-        }
         Write-Log -Type "WARN"  -Object "Defaulting to Windows Command line."
         $JBossCliCmd = "cmd /c '""$Path"" $CommandLine $Redirection'".Trim()
       }

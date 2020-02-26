@@ -10,7 +10,7 @@ function Invoke-ReloadServer {
     The path parameter corresponds to the path to the JBoss client.
 
     .PARAMETER Controller
-    The controller parameter corresponds to the hostname and port of the JBoss host.
+    The optional controller parameter corresponds to the hostname and port of the JBoss host.
 
     .PARAMETER Credentials
     The optional credentials parameter correspond to the credentials of the account to use to connect to JBoss.
@@ -30,7 +30,7 @@ function Invoke-ReloadServer {
     File name:      Invoke-ReloadServer.ps1
     Author:         Florian Carrier
     Creation date:  02/12/2019
-    Last modified:  10/01/2020
+    Last modified:  28/01/2020
 
     .LINK
     Invoke-JBossClient
@@ -41,7 +41,7 @@ function Invoke-ReloadServer {
   Param (
     [Parameter (
       Position    = 1,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Path to the JBoss client"
     )]
     [ValidateNotNUllOrEmpty ()]
@@ -49,7 +49,7 @@ function Invoke-ReloadServer {
     $Path,
     [Parameter (
       Position    = 2,
-      Mandatory   = $true,
+      Mandatory   = $false,
       HelpMessage = "Controller"
     )]
     # TODO validate format
@@ -72,11 +72,35 @@ function Invoke-ReloadServer {
   Process {
     # Define command
     $Command = ':reload()'
-    # Execute command
-    if ($PSBoundParameters.ContainsKey('Credentials')) {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials -Redirect
+    # Run command
+    if ($PSBoundParameters.ContainsKey("Path")) {
+      if ($PSBoundParameters.ContainsKey("Controller")) {
+        if ($PSBoundParameters.ContainsKey("Credentials")) {
+          Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Credentials $Credentials
+        } else {
+          Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command
+        }
+      } else {
+        if ($PSBoundParameters.ContainsKey("Credentials")) {
+          Invoke-JBossClient -Path $Path -Command $Command -Credentials $Credentials
+        } else {
+          Invoke-JBossClient -Path $Path -Command $Command
+        }
+      }
     } else {
-      Invoke-JBossClient -Path $Path -Controller $Controller -Command $Command -Redirect
+      if ($PSBoundParameters.ContainsKey("Controller")) {
+        if ($PSBoundParameters.ContainsKey("Credentials")) {
+          Invoke-JBossClient -Controller $Controller -Command $Command -Credentials $Credentials
+        } else {
+          Invoke-JBossClient -Controller $Controller -Command $Command
+        }
+      } else {
+        if ($PSBoundParameters.ContainsKey("Credentials")) {
+          Invoke-JBossClient -Command $Command -Credentials $Credentials
+        } else {
+          Invoke-JBossClient -Command $Command
+        }
+      }
     }
   }
 }

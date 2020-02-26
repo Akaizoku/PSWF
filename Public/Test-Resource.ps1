@@ -28,7 +28,8 @@ function Test-Resource {
     File name:      Test-Resource.ps1
     Author:         Florian Carrier
     Creation date:  14/01/2020
-    Last modified:  14/01/2020
+    Last modified:  26/02/2020
+    TODO            Wait for return from JBoss client to prevnt issue "Cannot validate argument on parameter 'Log'. The argument is null or empty."
 
     .LINK
     Invoke-JBossClient

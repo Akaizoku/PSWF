@@ -13,7 +13,7 @@ function Test-JBossClientOutcome {
     File name:      Test-JBossClientOutcome.ps1
     Author:         Florian Carrier
     Creation date:  10/01/2020
-    Last modified:  10/01/2020
+    Last modified:  26/02/2020
   #>
   [CmdletBinding()]
   Param (
@@ -24,8 +24,8 @@ function Test-JBossClientOutcome {
       ValueFromPipeline               = $true,
       ValueFromPipelineByPropertyName = $true
     )]
-    [ValidateNotNullOrEmpty()]
-    [Object]
+    # [ValidateNotNullOrEmpty()]
+    [System.Object]
     $Log
   )
   Begin {
@@ -33,13 +33,18 @@ function Test-JBossClientOutcome {
     Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
   }
   Process {
-    # Check JBoss client operation outcome
-    if (Select-String -InputObject $Log -Pattern '"outcome" => "success"' -SimpleMatch -Quiet) {
-      # If outcome is successfull
-      return $true
-    } else {
-      # If outcome is failed or an error occured
+    # Check if log contains information
+    if (($Log -eq $null) -Or ($Log -eq "")) {
       return $false
+    } else {
+      # Check JBoss client operation outcome
+      if (Select-String -InputObject $Log -Pattern '"outcome" => "success"' -SimpleMatch -Quiet) {
+        # If outcome is successfull
+        return $true
+      } else {
+        # If outcome is failed or an error occured
+        return $false
+      }
     }
   }
 }
