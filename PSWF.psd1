@@ -157,8 +157,8 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-[1.0.1]
-Bug fixes and improvements
+[1.1.0]
+Expansion
 '@
 
     } # End of PSData hashtable
